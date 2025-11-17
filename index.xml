@@ -12,11 +12,11 @@
         <pubDate>Mon, 17 Nov 2025 22:31:54 +0800</pubDate>
         
         <guid>https://byebydoggy.github.io/post/2025/%E5%8C%BA%E5%9D%97%E9%93%BE%E5%B7%A5%E5%85%B7evm-trackooor/</guid>
-        <description>&lt;img src="https://byebydoggy.github.io/cover.png" alt="Featured image of post 区块链扫描工具EVM-Trackooor" /&gt;&lt;p&gt;原工具地址&lt;/p&gt;
-&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Zellic/EVM-trackooor&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+        <description>&lt;img src="https://byebydoggy.github.io/cover.png" alt="Featured image of post 区块链扫描工具EVM-Trackooor" /&gt;&lt;h1 id=&#34;原工具地址&#34;&gt;原工具地址
+&lt;/h1&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Zellic/EVM-trackooor&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;github地址&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;部分优化&lt;/p&gt;
-&lt;ol&gt;
+&lt;h1 id=&#34;部分优化&#34;&gt;部分优化
+&lt;/h1&gt;&lt;ol&gt;
 &lt;li&gt;原工具依赖go-ethereum,目前仅支持1-3三种transaction type，ETH主网目前有第4种交易类型，非主网的交易类型更多。因此在events事件以及block刷新前过滤掉3种基本交易类型外的transaction，总体影响不大。&lt;/li&gt;
 &lt;li&gt;原工具检测的攻击行为全部是外部交易，然而目前黑客攻击基本都隐藏在内部交易中，需要基于交易详细日志去检测。 新增基于监控地址内部转移价值不平衡，Genois Safe Proxy权限转移等异常特征。&lt;/li&gt;
 &lt;li&gt;使用arkm威胁情报平台搜素主流项目的监控地址&lt;/li&gt;

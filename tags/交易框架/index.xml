@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>交易框架 on Byebyedoggy</title>
+        <link>https://byebydoggy.github.io/tags/%E4%BA%A4%E6%98%93%E6%A1%86%E6%9E%B6/</link>
+        <description>Recent content in 交易框架 on Byebyedoggy</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <lastBuildDate>Tue, 18 Nov 2025 01:27:19 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/tags/%E4%BA%A4%E6%98%93%E6%A1%86%E6%9E%B6/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>交易框架 Hummingbot</title>
+        <link>https://byebydoggy.github.io/post/2025/%E4%BA%A4%E6%98%93%E6%A1%86%E6%9E%B6hummingbot/</link>
+        <pubDate>Tue, 18 Nov 2025 01:27:19 +0800</pubDate>
+        
+        <guid>https://byebydoggy.github.io/post/2025/%E4%BA%A4%E6%98%93%E6%A1%86%E6%9E%B6hummingbot/</guid>
+        <description>&lt;img src="https://byebydoggy.github.io/cover.png" alt="Featured image of post 交易框架 Hummingbot" /&gt;&lt;h1 id=&#34;部分优化&#34;&gt;部分优化
+&lt;/h1&gt;&lt;ol&gt;
+&lt;li&gt;原项目在同一connector中添加多个symbol时，因Candles对象属于Clock对象，在生命周期每个tick每个Candles会向服务器发起health check，导致并发而被服务器限速，修改这部分问题。&lt;/li&gt;
+&lt;li&gt;对于全部执行器均适配合约交易&lt;/li&gt;
+&lt;li&gt;原项目完全基于tick进行策略触发，最短tick为1s，在ScriptStrategy基类基础上修改以支持事件驱动触发&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h1 id=&#34;待办&#34;&gt;待办
+&lt;/h1&gt;&lt;ol&gt;
+&lt;li&gt;回测框架支持自定义策略，以及更短的时间框架（1s）&lt;/li&gt;
+&lt;li&gt;支持从Tardis获取远期历史数据&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h1 id=&#34;附录&#34;&gt;附录
+&lt;/h1&gt;&lt;p&gt;原项目地址: &lt;a class=&#34;link&#34; href=&#34;https://github.com/hummingbot/hummingbot&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;github&lt;/a&gt;&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

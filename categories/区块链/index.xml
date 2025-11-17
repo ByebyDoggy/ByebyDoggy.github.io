@@ -6,7 +6,44 @@
         <description>Recent content in 区块链 on Byebyedoggy</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
-        <lastBuildDate>Mon, 17 Nov 2025 22:31:54 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Tue, 18 Nov 2025 01:40:11 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>交易框架|MarketDataCollector</title>
+        <link>https://byebydoggy.github.io/post/2025/%E4%BA%A4%E6%98%93%E6%A1%86%E6%9E%B6marketdatacollector/</link>
+        <pubDate>Tue, 18 Nov 2025 01:40:11 +0800</pubDate>
+        
+        <guid>https://byebydoggy.github.io/post/2025/%E4%BA%A4%E6%98%93%E6%A1%86%E6%9E%B6marketdatacollector/</guid>
+        <description>&lt;img src="https://byebydoggy.github.io/cover.png" alt="Featured image of post 交易框架|MarketDataCollector" /&gt;&lt;h1 id=&#34;介绍&#34;&gt;介绍
+&lt;/h1&gt;&lt;p&gt;使用coingecko及CMC定时采集主流交易所及链上项目合约地址，对于不同链不同交易所的相同币种使用coin_id作为唯一键进行定位，允许使用name,symbol,exchange,address进行索引。 用于整体交易流程中的代币查询流程。&lt;/p&gt;
+&lt;h1 id=&#34;代办&#34;&gt;代办
+&lt;/h1&gt;&lt;ol&gt;
+&lt;li&gt;优化查询操作&lt;/li&gt;
+&lt;li&gt;优化存储结构，降低内存占用&lt;/li&gt;
+&lt;/ol&gt;
+</description>
+        </item>
+        <item>
+        <title>交易框架 Hummingbot</title>
+        <link>https://byebydoggy.github.io/post/2025/%E4%BA%A4%E6%98%93%E6%A1%86%E6%9E%B6hummingbot/</link>
+        <pubDate>Tue, 18 Nov 2025 01:27:19 +0800</pubDate>
+        
+        <guid>https://byebydoggy.github.io/post/2025/%E4%BA%A4%E6%98%93%E6%A1%86%E6%9E%B6hummingbot/</guid>
+        <description>&lt;img src="https://byebydoggy.github.io/cover.png" alt="Featured image of post 交易框架 Hummingbot" /&gt;&lt;h1 id=&#34;部分优化&#34;&gt;部分优化
+&lt;/h1&gt;&lt;ol&gt;
+&lt;li&gt;原项目在同一connector中添加多个symbol时，因Candles对象属于Clock对象，在生命周期每个tick每个Candles会向服务器发起health check，导致并发而被服务器限速，修改这部分问题。&lt;/li&gt;
+&lt;li&gt;对于全部执行器均适配合约交易&lt;/li&gt;
+&lt;li&gt;原项目完全基于tick进行策略触发，最短tick为1s，在ScriptStrategy基类基础上修改以支持事件驱动触发&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h1 id=&#34;待办&#34;&gt;待办
+&lt;/h1&gt;&lt;ol&gt;
+&lt;li&gt;回测框架支持自定义策略，以及更短的时间框架（1s）&lt;/li&gt;
+&lt;li&gt;支持从Tardis获取远期历史数据&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h1 id=&#34;附录&#34;&gt;附录
+&lt;/h1&gt;&lt;p&gt;原项目地址: &lt;a class=&#34;link&#34; href=&#34;https://github.com/hummingbot/hummingbot&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;github&lt;/a&gt;&lt;/p&gt;
+</description>
+        </item>
+        <item>
         <title>区块链扫描工具EVM-Trackooor</title>
         <link>https://byebydoggy.github.io/post/2025/%E5%8C%BA%E5%9D%97%E9%93%BE%E5%B7%A5%E5%85%B7evm-trackooor/</link>
         <pubDate>Mon, 17 Nov 2025 22:31:54 +0800</pubDate>

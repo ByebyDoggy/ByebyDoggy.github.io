@@ -61,7 +61,10 @@
 &lt;h1 id=&#34;问题&#34;&gt;问题
 &lt;/h1&gt;&lt;ol&gt;
 &lt;li&gt;需本地部署节点以实时查询日志信息，若使用第三方RPC节点成本高于本地部署。&lt;/li&gt;
-&lt;li&gt;ARKM需要申请API，目前申请难度较高，计划前端逆向获取相关数据(待更新)&lt;/li&gt;
+&lt;li&gt;ARKM需要申请API，目前申请难度较高，&lt;del&gt;计划前端逆向获取相关数据(待更新)&lt;/del&gt;&lt;/li&gt;
+&lt;li&gt;使用前端逆向免费查询项目关联地址 &lt;a class=&#34;link&#34; href=&#34;https://byebydoggy.github.io/post/2025/ARKM%e5%89%8d%e7%ab%af%e9%80%86%e5%90%91&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;github地址&lt;/a&gt;
+~~&lt;/li&gt;
 &lt;/ol&gt;
 </description>
         </item>

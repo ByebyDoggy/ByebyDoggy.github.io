@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="ARKM平台前端逆向\r1.随便找个包，发现headers中携带X-Payload参数，堆栈点一点，找到加密位置\n2.控制台打印获取a.ClientKey\n3.Python编写加密函数\nimport requests\rimport time\rimport hashlib\rimport json\rquery = &#34;bybit&#34;\rsalt = &#34;gh67j345kl&#34;\rdef make_payload(path: str, ts: str) -&gt; str:\r&#34;&#34;&#34;复现 JS 里的两段 sha256 逻辑&#34;&#34;&#34;\rstep1 = hashlib.sha256(f&#34;{path}:{ts}:{salt}&#34;.encode()).hexdigest()\rreturn hashlib.sha256(f&#34;{salt}:{step1}&#34;.encode()).hexdigest()\rpath = &#34;/transfers&#34;\rts = str(int(time.time()))\rpayload = make_payload(path, ts)\r# 1. 构造与浏览器一致的请求头\rheaders = {\r&#34;accept&#34;: &#34;application/json, text/plain, */*&#34;,\r&#34;accept-encoding&#34;: &#34;gzip, deflate, br, zstd&#34;,\r&#34;accept-language&#34;: &#34;zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6&#34;,\r&#34;origin&#34;: &#34;https://intel.arkm.com&#34;,\r&#34;referer&#34;: &#34;https://intel.arkm.com/&#34;,\r&#34;sec-ch-ua&#34;: &#39;&#34;Chromium&#34;;v=&#34;142&#34;, &#34;Microsoft Edge&#34;;v=&#34;142&#34;, &#34;Not_A Brand&#34;;v=&#34;99&#34;&#39;,\r&#34;sec-ch-ua-mobile&#34;: &#34;?0&#34;,\r&#34;sec-ch-ua-platform&#34;: &#39;&#34;Windows&#34;&#39;,\r&#34;sec-fetch-dest&#34;: &#34;empty&#34;,\r&#34;sec-fetch-mode&#34;: &#34;cors&#34;,\r&#34;sec-fetch-site&#34;: &#34;same-site&#34;,\r&#34;user-agent&#34;: &#34;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 &#34;\r&#34;(KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0&#34;,\r&#34;x-timestamp&#34;: ts,\r&#34;x-payload&#34;: payload,\r&#34;cookie&#34;: &#34;_ga=GA1.1.1952893755.1763016182; _fbp=fb.1.1763016181936.907337779104231599; _clck=1erlme0%5E2%5Eg0z%5E0%5E2143; mp_db580d24fbe794a9a4765D&#34;\r}\r# 3. 发起请求\rurl = f&#34;https://api.arkm.com{path}&#34;\rresp = requests.get(url, headers=headers, timeout=10)\rprint(json.dumps(resp.json(), ensure_ascii=False, indent=2)) 4.获取完整的项目方关联地址，参与到后续区块扫描流程\n">
+<title>ARKM前端逆向</title>
+
+<link rel='canonical' href='https://byebydoggy.github.io/post/2025/arkm%E5%89%8D%E7%AB%AF%E9%80%86%E5%90%91/'>
+
+<link rel="stylesheet" href="/scss/style.min.4d36f8dc1fd48129e1635deb4b8eb2870fa09474f7280c4cb606d40b2526994b.css"><meta property='og:title' content="ARKM前端逆向">
+<meta property='og:description' content="ARKM平台前端逆向\r1.随便找个包，发现headers中携带X-Payload参数，堆栈点一点，找到加密位置\n2.控制台打印获取a.ClientKey\n3.Python编写加密函数\nimport requests\rimport time\rimport hashlib\rimport json\rquery = &#34;bybit&#34;\rsalt = &#34;gh67j345kl&#34;\rdef make_payload(path: str, ts: str) -&gt; str:\r&#34;&#34;&#34;复现 JS 里的两段 sha256 逻辑&#34;&#34;&#34;\rstep1 = hashlib.sha256(f&#34;{path}:{ts}:{salt}&#34;.encode()).hexdigest()\rreturn hashlib.sha256(f&#34;{salt}:{step1}&#34;.encode()).hexdigest()\rpath = &#34;/transfers&#34;\rts = str(int(time.time()))\rpayload = make_payload(path, ts)\r# 1. 构造与浏览器一致的请求头\rheaders = {\r&#34;accept&#34;: &#34;application/json, text/plain, */*&#34;,\r&#34;accept-encoding&#34;: &#34;gzip, deflate, br, zstd&#34;,\r&#34;accept-language&#34;: &#34;zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6&#34;,\r&#34;origin&#34;: &#34;https://intel.arkm.com&#34;,\r&#34;referer&#34;: &#34;https://intel.arkm.com/&#34;,\r&#34;sec-ch-ua&#34;: &#39;&#34;Chromium&#34;;v=&#34;142&#34;, &#34;Microsoft Edge&#34;;v=&#34;142&#34;, &#34;Not_A Brand&#34;;v=&#34;99&#34;&#39;,\r&#34;sec-ch-ua-mobile&#34;: &#34;?0&#34;,\r&#34;sec-ch-ua-platform&#34;: &#39;&#34;Windows&#34;&#39;,\r&#34;sec-fetch-dest&#34;: &#34;empty&#34;,\r&#34;sec-fetch-mode&#34;: &#34;cors&#34;,\r&#34;sec-fetch-site&#34;: &#34;same-site&#34;,\r&#34;user-agent&#34;: &#34;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 &#34;\r&#34;(KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0&#34;,\r&#34;x-timestamp&#34;: ts,\r&#34;x-payload&#34;: payload,\r&#34;cookie&#34;: &#34;_ga=GA1.1.1952893755.1763016182; _fbp=fb.1.1763016181936.907337779104231599; _clck=1erlme0%5E2%5Eg0z%5E0%5E2143; mp_db580d24fbe794a9a4765D&#34;\r}\r# 3. 发起请求\rurl = f&#34;https://api.arkm.com{path}&#34;\rresp = requests.get(url, headers=headers, timeout=10)\rprint(json.dumps(resp.json(), ensure_ascii=False, indent=2)) 4.获取完整的项目方关联地址，参与到后续区块扫描流程\n">
+<meta property='og:url' content='https://byebydoggy.github.io/post/2025/arkm%E5%89%8D%E7%AB%AF%E9%80%86%E5%90%91/'>
+<meta property='og:site_name' content='Byebyedoggy'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='区块链' /><meta property='article:tag' content='前端逆向' /><meta property='article:published_time' content='2025-11-18T11:15:05&#43;08:00'/><meta property='article:modified_time' content='2025-11-18T11:15:05&#43;08:00'/><meta property='og:image' content='https://byebydoggy.github.io/cover.png' />
+<meta name="twitter:title" content="ARKM前端逆向">
+<meta name="twitter:description" content="ARKM平台前端逆向\r1.随便找个包，发现headers中携带X-Payload参数，堆栈点一点，找到加密位置\n2.控制台打印获取a.ClientKey\n3.Python编写加密函数\nimport requests\rimport time\rimport hashlib\rimport json\rquery = &#34;bybit&#34;\rsalt = &#34;gh67j345kl&#34;\rdef make_payload(path: str, ts: str) -&gt; str:\r&#34;&#34;&#34;复现 JS 里的两段 sha256 逻辑&#34;&#34;&#34;\rstep1 = hashlib.sha256(f&#34;{path}:{ts}:{salt}&#34;.encode()).hexdigest()\rreturn hashlib.sha256(f&#34;{salt}:{step1}&#34;.encode()).hexdigest()\rpath = &#34;/transfers&#34;\rts = str(int(time.time()))\rpayload = make_payload(path, ts)\r# 1. 构造与浏览器一致的请求头\rheaders = {\r&#34;accept&#34;: &#34;application/json, text/plain, */*&#34;,\r&#34;accept-encoding&#34;: &#34;gzip, deflate, br, zstd&#34;,\r&#34;accept-language&#34;: &#34;zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6&#34;,\r&#34;origin&#34;: &#34;https://intel.arkm.com&#34;,\r&#34;referer&#34;: &#34;https://intel.arkm.com/&#34;,\r&#34;sec-ch-ua&#34;: &#39;&#34;Chromium&#34;;v=&#34;142&#34;, &#34;Microsoft Edge&#34;;v=&#34;142&#34;, &#34;Not_A Brand&#34;;v=&#34;99&#34;&#39;,\r&#34;sec-ch-ua-mobile&#34;: &#34;?0&#34;,\r&#34;sec-ch-ua-platform&#34;: &#39;&#34;Windows&#34;&#39;,\r&#34;sec-fetch-dest&#34;: &#34;empty&#34;,\r&#34;sec-fetch-mode&#34;: &#34;cors&#34;,\r&#34;sec-fetch-site&#34;: &#34;same-site&#34;,\r&#34;user-agent&#34;: &#34;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 &#34;\r&#34;(KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0&#34;,\r&#34;x-timestamp&#34;: ts,\r&#34;x-payload&#34;: payload,\r&#34;cookie&#34;: &#34;_ga=GA1.1.1952893755.1763016182; _fbp=fb.1.1763016181936.907337779104231599; _clck=1erlme0%5E2%5Eg0z%5E0%5E2143; mp_db580d24fbe794a9a4765D&#34;\r}\r# 3. 发起请求\rurl = f&#34;https://api.arkm.com{path}&#34;\rresp = requests.get(url, headers=headers, timeout=10)\rprint(json.dumps(resp.json(), ensure_ascii=False, indent=2)) 4.获取完整的项目方关联地址，参与到后续区块扫描流程\n"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://byebydoggy.github.io/cover.png' />
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column compact"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_8ac7c2653184b428.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Byebyedoggy</a></h1>
+            <h2 class="site-description"></h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    
+
+            <main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/post/2025/arkm%E5%89%8D%E7%AB%AF%E9%80%86%E5%90%91/">
+                
+                    <img src="/cover.png" loading="lazy" alt="Featured image of post ARKM前端逆向" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/post/2025/arkm%E5%89%8D%E7%AB%AF%E9%80%86%E5%90%91/">ARKM前端逆向</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published" datetime='2025-11-18T11:15:05&#43;08:00'>Nov 18, 2025</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 1 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="arkm平台前端逆向">ARKM平台前端逆向
+</h1><p>1.随便找个包，发现headers中携带X-Payload参数，堆栈点一点，找到加密位置</p>
+<p><img src="https://www.imgur.la/images/2025/11/18/097f21372cda45b9b04bfe4364917d8b.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="097f21372cda45b9b04bfe4364917d8b"
+	
+	
+></p>
+<p>2.控制台打印获取a.ClientKey</p>
+<p><img src="https://www.imgur.la/images/2025/11/18/05785df35119761a009ecdcdac63c768.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="05785df35119761a009ecdcdac63c768"
+	
+	
+></p>
+<p>3.Python编写加密函数</p>
+<pre tabindex="0"><code class="language-python-repl" data-lang="python-repl">import requests
+import time
+import hashlib
+import json
+query = &#34;bybit&#34;
+salt = &#34;gh67j345kl&#34;
+def make_payload(path: str, ts: str) -&gt; str:
+    &#34;&#34;&#34;复现 JS 里的两段 sha256 逻辑&#34;&#34;&#34;
+    step1 = hashlib.sha256(f&#34;{path}:{ts}:{salt}&#34;.encode()).hexdigest()
+    return hashlib.sha256(f&#34;{salt}:{step1}&#34;.encode()).hexdigest()
+
+path = &#34;/transfers&#34;
+ts = str(int(time.time()))
+payload = make_payload(path, ts)
+# 1. 构造与浏览器一致的请求头
+headers = {
+    &#34;accept&#34;: &#34;application/json, text/plain, */*&#34;,
+    &#34;accept-encoding&#34;: &#34;gzip, deflate, br, zstd&#34;,
+    &#34;accept-language&#34;: &#34;zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6&#34;,
+    &#34;origin&#34;: &#34;https://intel.arkm.com&#34;,
+    &#34;referer&#34;: &#34;https://intel.arkm.com/&#34;,
+    &#34;sec-ch-ua&#34;: &#39;&#34;Chromium&#34;;v=&#34;142&#34;, &#34;Microsoft Edge&#34;;v=&#34;142&#34;, &#34;Not_A Brand&#34;;v=&#34;99&#34;&#39;,
+    &#34;sec-ch-ua-mobile&#34;: &#34;?0&#34;,
+    &#34;sec-ch-ua-platform&#34;: &#39;&#34;Windows&#34;&#39;,
+    &#34;sec-fetch-dest&#34;: &#34;empty&#34;,
+    &#34;sec-fetch-mode&#34;: &#34;cors&#34;,
+    &#34;sec-fetch-site&#34;: &#34;same-site&#34;,
+    &#34;user-agent&#34;: &#34;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 &#34;
+                  &#34;(KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 Edg/142.0.0.0&#34;,
+    &#34;x-timestamp&#34;: ts,
+    &#34;x-payload&#34;: payload,
+        &#34;cookie&#34;: &#34;_ga=GA1.1.1952893755.1763016182; _fbp=fb.1.1763016181936.907337779104231599; _clck=1erlme0%5E2%5Eg0z%5E0%5E2143; mp_db580d24fbe794a9a4765D&#34;
+}
+
+# 3. 发起请求
+url = f&#34;https://api.arkm.com{path}&#34;
+resp = requests.get(url, headers=headers, timeout=10)
+print(json.dumps(resp.json(), ensure_ascii=False, indent=2))
+</code></pre><p>4.获取完整的项目方关联地址，参与到后续区块扫描流程</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/%E5%8C%BA%E5%9D%97%E9%93%BE/">区块链</a>
+        
+            <a href="/tags/%E5%89%8D%E7%AB%AF%E9%80%86%E5%90%91/">前端逆向</a>
+        
+    </section>
+
+
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/post/2025/%E4%BA%A4%E6%98%93%E6%A1%86%E6%9E%B6marketdatacollector/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/cover.png" loading="lazy" data-key="交易框架|MarketDataCollector" data-hash="/cover.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">交易框架|MarketDataCollector</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/2025/%E4%BA%A4%E6%98%93%E6%A1%86%E6%9E%B6hummingbot/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/cover.png" loading="lazy" data-key="交易框架Hummingbot" data-hash="/cover.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">交易框架 Hummingbot</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/2025/%E5%8C%BA%E5%9D%97%E9%93%BE%E5%B7%A5%E5%85%B7evm-trackooor/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/cover.png" loading="lazy" data-key="区块链工具|EVM-Trackooor" data-hash="/cover.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">区块链扫描工具EVM-Trackooor</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+        2025 Byebyedoggy
+    </section>
+    
+    <section class="powerby">
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.32.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.c922af694cc257bf1ecc41c0dd7b0430f9114ec280ccf67cd2c6ad55f5316c4e.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

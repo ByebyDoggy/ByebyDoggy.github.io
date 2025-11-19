@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Bug on Byebyedoggy</title>
+        <link>https://byebydoggy.github.io/tags/bug/</link>
+        <description>Recent content in Bug on Byebyedoggy</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <lastBuildDate>Wed, 19 Nov 2025 22:19:38 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/tags/bug/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Hummingbot内存泄露Bug排查</title>
+        <link>https://byebydoggy.github.io/post/2025/hummingbot%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2bug%E6%8E%92%E6%9F%A5/</link>
+        <pubDate>Wed, 19 Nov 2025 22:19:38 +0800</pubDate>
+        
+        <guid>https://byebydoggy.github.io/post/2025/hummingbot%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2bug%E6%8E%92%E6%9F%A5/</guid>
+        <description>&lt;img src="https://byebydoggy.github.io/cover.png" alt="Featured image of post Hummingbot内存泄露Bug排查" /&gt;&lt;h1 id=&#34;起因&#34;&gt;起因
+&lt;/h1&gt;&lt;p&gt;发现运行OKX_perpetual连接器时，hummingbot每隔一小时内存会增长100MB。（为此错失了几年一次的&lt;del&gt;抄底&lt;/del&gt;爆仓机会）&lt;/p&gt;
+&lt;h1 id=&#34;排查&#34;&gt;排查
+&lt;/h1&gt;&lt;p&gt;跟随GPT指引，先使用了pyrasite-shell hook全部hummingbot模块中的对象内存占用，每隔一段时间定时快照，并比较快照不同。  然而几分钟之后pyrasite就与hummingbot进程解除绑定了，不知道什么原因，多次尝试也不行。&lt;/p&gt;
+&lt;p&gt;后来改下启动程序，在开头单独启动一个内存对象监听的进程。定位到json/decoder每隔10分钟增长大概30MB，以及okx_perpetual_order_book模块中同步的内存增长。 发现mark_price,index_price频道均订阅但无消费者，导致队列无限增长，项目组的大坑今天才算填上，难道没人用okx_perpetual吗？&lt;/p&gt;
+&lt;h1 id=&#34;后续工作&#34;&gt;后续工作
+&lt;/h1&gt;&lt;p&gt;1.基于Hummingbot Connector和Python MT5将MT5集成到Hummingbot以实现加密货币与最大的外汇市场统一策略编写。&lt;/p&gt;
+&lt;p&gt;2.修改Hummingbot的回测框架，以支持秒级TimeFrame和从本地文件流式传输数据。&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

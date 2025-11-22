@@ -6,7 +6,24 @@
         <description>Recent content in Posts on Byebyedoggy</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
-        <lastBuildDate>Fri, 21 Nov 2025 16:12:01 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/post/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sun, 23 Nov 2025 01:08:52 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/post/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>DevEnvSetting Docker</title>
+        <link>https://byebydoggy.github.io/post/2025/devenvsetting-docker/</link>
+        <pubDate>Sun, 23 Nov 2025 01:08:52 +0800</pubDate>
+        
+        <guid>https://byebydoggy.github.io/post/2025/devenvsetting-docker/</guid>
+        <description>&lt;img src="https://byebydoggy.github.io/cover.png" alt="Featured image of post DevEnvSetting Docker" /&gt;&lt;h1 id=&#34;引言&#34;&gt;引言
+&lt;/h1&gt;&lt;p&gt;最近正在完善Hummingbot回测模块，因为需要联动Dashboard，api，api-client多个模块，底层依赖hummingbot主库，需要本地打包hummingbot。而原项目使用conda及pip作为包管理，之前一直是本地pip虚拟环境安装库开发，环境管理相对复杂。刚刚偶然发现可以直接使用pycharm内置的一个小功能&amp;mdash;使用已构建的docker容器中环境进行开发。&lt;/p&gt;
+&lt;h1 id=&#34;操作&#34;&gt;操作
+&lt;/h1&gt;&lt;ol&gt;
+&lt;li&gt;添加新的解释器&lt;/li&gt;
+&lt;li&gt;选择Docker或者Docker-Compose(没啥区别，选择dockerfile可以选择每次重新构建)&lt;/li&gt;
+&lt;li&gt;按照步骤选择，最终需要选择Dockerfile中的虚拟环境路径。&lt;/li&gt;
+&lt;li&gt;至此可以直接使用Docker完成开发环境构建，Clone下来的项目如果有docker文件可以直接无痛启动开发环境了。&lt;/li&gt;
+&lt;/ol&gt;
+</description>
+        </item>
+        <item>
         <title>CodeQL 1</title>
         <link>https://byebydoggy.github.io/post/2025/codeql-1/</link>
         <pubDate>Fri, 21 Nov 2025 16:12:01 +0800</pubDate>
@@ -52,6 +69,9 @@
 &lt;/h1&gt;&lt;p&gt;可以在命令行执行&lt;/p&gt;
 &lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;codeql query run --database=./cc6-db --search-path=E:\tools\CodeQL\codeql ./detect-invoker.ql
 &lt;/code&gt;&lt;/pre&gt;&lt;p&gt;或者在VsCode插件中执行&lt;/p&gt;
+&lt;h1 id=&#34;参考文档&#34;&gt;参考文档
+&lt;/h1&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://codeql.github.com/docs&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://codeql.github.com/docs&lt;/a&gt;&lt;/p&gt;
 </description>
         </item>
         <item>

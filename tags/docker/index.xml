@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Docker on Byebyedoggy</title>
+        <link>https://byebydoggy.github.io/tags/docker/</link>
+        <description>Recent content in Docker on Byebyedoggy</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <lastBuildDate>Sun, 23 Nov 2025 01:08:52 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/tags/docker/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>DevEnvSetting Docker</title>
+        <link>https://byebydoggy.github.io/post/2025/devenvsetting-docker/</link>
+        <pubDate>Sun, 23 Nov 2025 01:08:52 +0800</pubDate>
+        
+        <guid>https://byebydoggy.github.io/post/2025/devenvsetting-docker/</guid>
+        <description>&lt;img src="https://byebydoggy.github.io/cover.png" alt="Featured image of post DevEnvSetting Docker" /&gt;&lt;h1 id=&#34;引言&#34;&gt;引言
+&lt;/h1&gt;&lt;p&gt;最近正在完善Hummingbot回测模块，因为需要联动Dashboard，api，api-client多个模块，底层依赖hummingbot主库，需要本地打包hummingbot。而原项目使用conda及pip作为包管理，之前一直是本地pip虚拟环境安装库开发，环境管理相对复杂。刚刚偶然发现可以直接使用pycharm内置的一个小功能&amp;mdash;使用已构建的docker容器中环境进行开发。&lt;/p&gt;
+&lt;h1 id=&#34;操作&#34;&gt;操作
+&lt;/h1&gt;&lt;ol&gt;
+&lt;li&gt;添加新的解释器&lt;/li&gt;
+&lt;li&gt;选择Docker或者Docker-Compose(没啥区别，选择dockerfile可以选择每次重新构建)&lt;/li&gt;
+&lt;li&gt;按照步骤选择，最终需要选择Dockerfile中的虚拟环境路径。&lt;/li&gt;
+&lt;li&gt;至此可以直接使用Docker完成开发环境构建，Clone下来的项目如果有docker文件可以直接无痛启动开发环境了。&lt;/li&gt;
+&lt;/ol&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

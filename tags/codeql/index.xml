@@ -52,6 +52,9 @@
 &lt;/h1&gt;&lt;p&gt;可以在命令行执行&lt;/p&gt;
 &lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;codeql query run --database=./cc6-db --search-path=E:\tools\CodeQL\codeql ./detect-invoker.ql
 &lt;/code&gt;&lt;/pre&gt;&lt;p&gt;或者在VsCode插件中执行&lt;/p&gt;
+&lt;h1 id=&#34;参考文档&#34;&gt;参考文档
+&lt;/h1&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://codeql.github.com/docs&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://codeql.github.com/docs&lt;/a&gt;&lt;/p&gt;
 </description>
         </item>
         

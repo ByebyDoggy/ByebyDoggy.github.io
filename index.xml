@@ -6,7 +6,22 @@
         <description>Recent content on Byebyedoggy</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
-        <lastBuildDate>Sun, 23 Nov 2025 01:08:52 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sun, 23 Nov 2025 13:56:21 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>2025 11 23 Port3 Hack</title>
+        <link>https://byebydoggy.github.io/post/2025/2025-11-23-port3-hack/</link>
+        <pubDate>Sun, 23 Nov 2025 13:56:21 +0800</pubDate>
+        
+        <guid>https://byebydoggy.github.io/post/2025/2025-11-23-port3-hack/</guid>
+        <description>&lt;img src="https://byebydoggy.github.io/cover.png" alt="Featured image of post 2025 11 23 Port3 Hack" /&gt;&lt;h1 id=&#34;evm-trackoor检测规则&#34;&gt;EVM-Trackoor检测规则
+&lt;/h1&gt;&lt;p&gt;2025-11-23-04:56监控Mint地址0x000000&amp;hellip;.00转移10亿port3代币(3000W $)到黑客地址0xb13A503dA5f368E48577c87b5d5AeC73d08f812E&lt;/p&gt;
+&lt;p&gt;hash:0x34c17a91b2f2ccd5973ecd49c20cc3c0939c5d8eaeeb740e9dec97fb1345e1da&lt;/p&gt;
+&lt;h1 id=&#34;漏洞原理&#34;&gt;漏洞原理
+&lt;/h1&gt;&lt;p&gt;Port3 bridgeIn正常调用时要求调用者存入代币和铸造的Port3代币价值相等，黑客利用可能缺失对铸造请求的签名校验、无重复请求拦截机制，或是未绑定合法铸造的权限地址白名单” 导致了0存入而大额铸造的漏洞。&lt;/p&gt;
+&lt;h1 id=&#34;获利机会&#34;&gt;获利机会
+&lt;/h1&gt;&lt;p&gt;4：56分监控到异常转移，5:05分黑客抛售，有10分钟做空空间，包含币安合约。&lt;/p&gt;
+</description>
+        </item>
+        <item>
         <title>DevEnvSetting Docker</title>
         <link>https://byebydoggy.github.io/post/2025/devenvsetting-docker/</link>
         <pubDate>Sun, 23 Nov 2025 01:08:52 +0800</pubDate>

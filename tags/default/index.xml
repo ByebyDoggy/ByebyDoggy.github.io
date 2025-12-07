@@ -2,20 +2,24 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>Default on Byebyedoggy</title>
-        <link>http://localhost:1313/tags/default/</link>
+        <link>https://byebydoggy.github.io/tags/default/</link>
         <description>Recent content in Default on Byebyedoggy</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
-        <lastBuildDate>Mon, 17 Nov 2025 22:31:54 +0800</lastBuildDate><atom:link href="http://localhost:1313/tags/default/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>1117 23123</title>
-        <link>http://localhost:1313/post/2025/1117-23123/</link>
-        <pubDate>Mon, 17 Nov 2025 22:31:54 +0800</pubDate>
+        <lastBuildDate>Fri, 05 Dec 2025 19:31:10 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/tags/default/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>CVE-2025-55182</title>
+        <link>https://byebydoggy.github.io/post/2025/cve-2025-55182/</link>
+        <pubDate>Fri, 05 Dec 2025 19:31:10 +0800</pubDate>
         
-        <guid>http://localhost:1313/post/2025/1117-23123/</guid>
-        <description>&lt;img src="http://localhost:1313/cover.png" alt="Featured image of post 1117 23123" /&gt;&lt;h1 id=&#34;t1&#34;&gt;T1
-&lt;/h1&gt;&lt;p&gt;title 1 txt&lt;/p&gt;
-&lt;h2 id=&#34;t2&#34;&gt;T2
-&lt;/h2&gt;&lt;p&gt;title 2 txt&lt;/p&gt;
+        <guid>https://byebydoggy.github.io/post/2025/cve-2025-55182/</guid>
+        <description>&lt;img src="https://byebydoggy.github.io/cover.png" alt="Featured image of post CVE-2025-55182" /&gt;&lt;h1 id=&#34;nuclei&#34;&gt;nuclei
+&lt;/h1&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;&#34; &gt;nuclei模板&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id=&#34;gui利用工具&#34;&gt;GUI利用工具
+&lt;/h1&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Malayke/Next.js-RSC-RCE-Scanner-CVE-2025-66478&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;github工具&lt;/a&gt;&lt;/p&gt;
+&lt;h1 id=&#34;poc&#34;&gt;POC
+&lt;/h1&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://gist.github.com/maple3142/48bc9393f45e068cf8c90ab865c0f5f3&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;github&lt;/a&gt;&lt;/p&gt;
 </description>
         </item>
         

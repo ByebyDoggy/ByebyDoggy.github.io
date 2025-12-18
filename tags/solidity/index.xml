@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
-        <title>区块链 on Byebyedoggy</title>
-        <link>https://byebydoggy.github.io/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/</link>
-        <description>Recent content in 区块链 on Byebyedoggy</description>
+        <title>Solidity on Byebyedoggy</title>
+        <link>https://byebydoggy.github.io/tags/solidity/</link>
+        <description>Recent content in Solidity on Byebyedoggy</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
-        <lastBuildDate>Thu, 18 Dec 2025 18:22:21 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Thu, 18 Dec 2025 18:22:21 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/tags/solidity/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>1218 Abracadabra(MIM_SPELL) CauldronV4合约漏洞分析</title>
         <link>https://byebydoggy.github.io/post/2025/1218-abracadabramim_spell-cauldronv4%E5%90%88%E7%BA%A6%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/</link>
         <pubDate>Thu, 18 Dec 2025 18:22:21 +0800</pubDate>
@@ -103,94 +103,6 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;以上cook函数实现功能如下，输入一个actions列表，依次执行action，执行全部结束后检查调用者是否破产，若破产，reverte.&lt;/p&gt;
 &lt;h1 id=&#34;问题&#34;&gt;问题
 &lt;/h1&gt;&lt;p&gt;该版本Cauldron cook函数新增了else判断，使用了function_additionalCookAction以兼容后续更新,若调用者传入不存在的action时，走虚函数返回returnStatus为false，导致无需进行破产检查。因此可以输入actions=[Action.Borrow,任意不存在的action] 即可借出全部资产。&lt;/p&gt;
-</description>
-        </item>
-        <item>
-        <title>某加密货币预测市场提现接口漏洞</title>
-        <link>https://byebydoggy.github.io/post/2025/%E6%9F%90%E5%8A%A0%E5%AF%86%E8%B4%A7%E5%B8%81%E9%A2%84%E6%B5%8B%E5%B8%82%E5%9C%BA%E6%8F%90%E7%8E%B0%E6%8E%A5%E5%8F%A3%E6%BC%8F%E6%B4%9E/</link>
-        <pubDate>Thu, 18 Dec 2025 18:20:44 +0800</pubDate>
-        
-        <guid>https://byebydoggy.github.io/post/2025/%E6%9F%90%E5%8A%A0%E5%AF%86%E8%B4%A7%E5%B8%81%E9%A2%84%E6%B5%8B%E5%B8%82%E5%9C%BA%E6%8F%90%E7%8E%B0%E6%8E%A5%E5%8F%A3%E6%BC%8F%E6%B4%9E/</guid>
-        <description>&lt;img src="https://byebydoggy.github.io/cover.png" alt="Featured image of post 某加密货币预测市场提现接口漏洞" /&gt;&lt;h1 id=&#34;思路&#34;&gt;思路
-&lt;/h1&gt;&lt;p&gt;CVE-2025-55182发布后随机扫描区块链项目方，偶然发现这个小项目方。 进入服务器发现Next.js框架仅用于SSR渲染前端页面，没啥用处。获取到后端API地址以后，扫描后端端口及目录，发现swagger API，其中具有提现接口，然而调用时似乎缺少参数，于是分析前端打包后的代码，参数中包含提现目的地址和提现数量，简单试了下大数，小数，负数，科学计数法等等发现单次调用都会报错，所以应该是没有溢出问题，并发发起调用请求时可以多次提现，导致余额为负数。&lt;/p&gt;
-&lt;p&gt;该漏洞本质还是Web漏洞，项目方修复速度很快，&lt;del&gt;点赞&lt;/del&gt;&lt;/p&gt;
-</description>
-        </item>
-        <item>
-        <title>2025 11 23 Port3 Hack</title>
-        <link>https://byebydoggy.github.io/post/2025/2025-11-23-port3-hack/</link>
-        <pubDate>Sun, 23 Nov 2025 13:56:21 +0800</pubDate>
-        
-        <guid>https://byebydoggy.github.io/post/2025/2025-11-23-port3-hack/</guid>
-        <description>&lt;img src="https://byebydoggy.github.io/cover.png" alt="Featured image of post 2025 11 23 Port3 Hack" /&gt;&lt;h1 id=&#34;evm-trackoor检测规则&#34;&gt;EVM-Trackoor检测规则
-&lt;/h1&gt;&lt;p&gt;2025-11-23-04:56监控Mint地址0x000000&amp;hellip;.00转移10亿port3代币(3000W $)到黑客地址0xb13A503dA5f368E48577c87b5d5AeC73d08f812E&lt;/p&gt;
-&lt;p&gt;hash:0x34c17a91b2f2ccd5973ecd49c20cc3c0939c5d8eaeeb740e9dec97fb1345e1da&lt;/p&gt;
-&lt;h1 id=&#34;漏洞原理&#34;&gt;漏洞原理
-&lt;/h1&gt;&lt;p&gt;Port3 bridgeIn正常调用时要求调用者存入代币和铸造的Port3代币价值相等，黑客利用可能缺失对铸造请求的签名校验、无重复请求拦截机制，或是未绑定合法铸造的权限地址白名单” 导致了0存入而大额铸造的漏洞。&lt;/p&gt;
-&lt;h1 id=&#34;获利机会&#34;&gt;获利机会
-&lt;/h1&gt;&lt;p&gt;4：56分监控到异常转移，5:05分黑客抛售，有10分钟做空空间，包含币安合约。&lt;/p&gt;
-</description>
-        </item>
-        <item>
-        <title>交易框架|MarketDataCollector</title>
-        <link>https://byebydoggy.github.io/post/2025/%E4%BA%A4%E6%98%93%E6%A1%86%E6%9E%B6marketdatacollector/</link>
-        <pubDate>Tue, 18 Nov 2025 01:40:11 +0800</pubDate>
-        
-        <guid>https://byebydoggy.github.io/post/2025/%E4%BA%A4%E6%98%93%E6%A1%86%E6%9E%B6marketdatacollector/</guid>
-        <description>&lt;img src="https://byebydoggy.github.io/cover.png" alt="Featured image of post 交易框架|MarketDataCollector" /&gt;&lt;h1 id=&#34;介绍&#34;&gt;介绍
-&lt;/h1&gt;&lt;p&gt;使用coingecko及CMC定时采集主流交易所及链上项目合约地址，对于不同链不同交易所的相同币种使用coin_id作为唯一键进行定位，允许使用name,symbol,exchange,address进行索引。 用于整体交易流程中的代币查询流程。&lt;/p&gt;
-&lt;h1 id=&#34;代办&#34;&gt;代办
-&lt;/h1&gt;&lt;ol&gt;
-&lt;li&gt;优化查询操作&lt;/li&gt;
-&lt;li&gt;优化存储结构，降低内存占用&lt;/li&gt;
-&lt;/ol&gt;
-</description>
-        </item>
-        <item>
-        <title>交易框架 Hummingbot</title>
-        <link>https://byebydoggy.github.io/post/2025/%E4%BA%A4%E6%98%93%E6%A1%86%E6%9E%B6hummingbot/</link>
-        <pubDate>Tue, 18 Nov 2025 01:27:19 +0800</pubDate>
-        
-        <guid>https://byebydoggy.github.io/post/2025/%E4%BA%A4%E6%98%93%E6%A1%86%E6%9E%B6hummingbot/</guid>
-        <description>&lt;img src="https://byebydoggy.github.io/cover.png" alt="Featured image of post 交易框架 Hummingbot" /&gt;&lt;h1 id=&#34;部分优化&#34;&gt;部分优化
-&lt;/h1&gt;&lt;ol&gt;
-&lt;li&gt;原项目在同一connector中添加多个symbol时，因Candles对象属于Clock对象，在生命周期每个tick每个Candles会向服务器发起health check，导致并发而被服务器限速，修改这部分问题。&lt;/li&gt;
-&lt;li&gt;对于全部执行器均适配合约交易&lt;/li&gt;
-&lt;li&gt;原项目完全基于tick进行策略触发，最短tick为1s，在ScriptStrategy基类基础上修改以支持事件驱动触发&lt;/li&gt;
-&lt;/ol&gt;
-&lt;h1 id=&#34;待办&#34;&gt;待办
-&lt;/h1&gt;&lt;ol&gt;
-&lt;li&gt;回测框架支持自定义策略，以及更短的时间框架（1s）&lt;/li&gt;
-&lt;li&gt;支持从Tardis获取远期历史数据&lt;/li&gt;
-&lt;/ol&gt;
-&lt;h1 id=&#34;附录&#34;&gt;附录
-&lt;/h1&gt;&lt;p&gt;原项目地址: &lt;a class=&#34;link&#34; href=&#34;https://github.com/hummingbot/hummingbot&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;github&lt;/a&gt;&lt;/p&gt;
-</description>
-        </item>
-        <item>
-        <title>区块链扫描工具EVM-Trackooor</title>
-        <link>https://byebydoggy.github.io/post/2025/%E5%8C%BA%E5%9D%97%E9%93%BE%E5%B7%A5%E5%85%B7evm-trackooor/</link>
-        <pubDate>Mon, 17 Nov 2025 22:31:54 +0800</pubDate>
-        
-        <guid>https://byebydoggy.github.io/post/2025/%E5%8C%BA%E5%9D%97%E9%93%BE%E5%B7%A5%E5%85%B7evm-trackooor/</guid>
-        <description>&lt;img src="https://byebydoggy.github.io/cover.png" alt="Featured image of post 区块链扫描工具EVM-Trackooor" /&gt;&lt;h1 id=&#34;原工具地址&#34;&gt;原工具地址
-&lt;/h1&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/Zellic/EVM-trackooor&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;github地址&lt;/a&gt;&lt;/p&gt;
-&lt;h1 id=&#34;部分优化&#34;&gt;部分优化
-&lt;/h1&gt;&lt;ol&gt;
-&lt;li&gt;原工具依赖go-ethereum,目前仅支持1-3三种transaction type，ETH主网目前有第4种交易类型，非主网的交易类型更多。因此在events事件以及block刷新前过滤掉3种基本交易类型外的transaction，总体影响不大。&lt;/li&gt;
-&lt;li&gt;原工具检测的攻击行为全部是外部交易，然而目前黑客攻击基本都隐藏在内部交易中，需要基于交易详细日志去检测。 新增基于监控地址内部转移价值不平衡，Genois Safe Proxy权限转移等异常特征。&lt;/li&gt;
-&lt;li&gt;使用arkm威胁情报平台搜素主流项目的监控地址&lt;/li&gt;
-&lt;/ol&gt;
-&lt;h1 id=&#34;问题&#34;&gt;问题
-&lt;/h1&gt;&lt;ol&gt;
-&lt;li&gt;需本地部署节点以实时查询日志信息，若使用第三方RPC节点成本高于本地部署。&lt;/li&gt;
-&lt;li&gt;ARKM需要申请API，目前申请难度较高，&lt;del&gt;计划前端逆向获取相关数据(待更新)&lt;/del&gt;&lt;/li&gt;
-&lt;li&gt;使用前端逆向免费查询项目关联地址 &lt;a class=&#34;link&#34; href=&#34;https://byebydoggy.github.io/post/2025/ARKM%e5%89%8d%e7%ab%af%e9%80%86%e5%90%91&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;github地址&lt;/a&gt;
-~~&lt;/li&gt;
-&lt;/ol&gt;
 </description>
         </item>
         

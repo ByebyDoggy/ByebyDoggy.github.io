@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="相关信息\r交易日志:\n0x3a8bde0a17e04f6a119ae2f28e6b56ac736feb70761e2fa97cac25f816f751c2\n代理合约\n0x0689aa2234d06Ac0d04cdac874331d287aFA4B43\n实际漏洞合约\n0x7dbE30FDE1Eca6856806fF14fc456ec6791c73FE\nPool.sol\n// SPDX-License-Identifier: MIT pragma solidity ^0.6.8; import &#34;@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol&#34;; import &#34;@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol&#34;; import &#34;@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol&#34;; import &#34;@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol&#34;; import &#34;./OwnerPausable.sol&#34;; contract Pool is Initializable, OwnableUpgradeSafe, OwnerPausable { using SafeMath for uint256; uint public sharePrice; uint mantissa; uint public totalShares; mapping(address =&gt; uint) public capitalProviders; address public erc20address; string name; uint public totalFundsLimit = 0; uint public transactionLimit = 0; event DepositMade(address indexed capitalProvider, uint amount); event WithdrawalMade(address indexed capitalProvider, uint amount); event TransferMade(address indexed from, address indexed to, uint amount); event InterestCollected(address indexed payer, uint amount); event PrincipalCollected(address indexed payer, uint amount); event LimitChanged(address indexed owner, string limitType, uint amount); function initialize(address _erc20address, string memory _name, uint _mantissa) public initializer { __Context_init_unchained(); __Ownable_init_unchained(); __OwnerPausable__init(); name = _name; erc20address = _erc20address; mantissa = _mantissa; sharePrice = _mantissa; // Sanity check the address ERC20UpgradeSafe(erc20address).totalSupply(); // Unlock self for infinite amount ERC20UpgradeSafe(erc20address).approve(address(this), uint(-1)); } function deposit(uint amount) external payable whenNotPaused { require(transactionWithinLimit(amount), &#34;Amount is over the per-transaction limit.&#34;); // Determine current shares the address has, and the amount of new shares to be added uint currentShares = capitalProviders[msg.sender]; uint depositShares = getNumShares(amount, mantissa, sharePrice); uint potentialNewTotalShares = totalShares.add(depositShares); require(poolWithinLimit(potentialNewTotalShares), &#34;Deposit would put the Pool over the total limit.&#34;); doERC20Transfer(msg.sender, address(this), amount); // Add the new shares to both the pool and the address totalShares = totalShares.add(depositShares); capitalProviders[msg.sender] = currentShares.add(depositShares); emit DepositMade(msg.sender, amount); } function withdraw(uint amount) external whenNotPaused { // Determine current shares the address has and the shares requested to withdraw require(transactionWithinLimit(amount), &#34;Amount is over the per-transaction limit&#34;); uint currentShares = capitalProviders[msg.sender]; uint withdrawShares = getNumShares(amount, mantissa, sharePrice); // Ensure the address has enough value in the pool require(withdrawShares &lt;= currentShares, &#34;Amount requested is greater than what this address owns&#34;); // Remove the new shares from both the pool and the address totalShares = totalShares.sub(withdrawShares); capitalProviders[msg.sender] = currentShares.sub(withdrawShares); // Send the amount to the address doERC20Transfer(address(this), msg.sender, amount); emit WithdrawalMade(msg.sender, amount); } function collectInterestRepayment(address from, uint amount) external whenNotPaused { doERC20Transfer(from, address(this), amount); uint increment = amount.mul(mantissa).div(totalShares); sharePrice = sharePrice + increment; emit InterestCollected(from, amount); } function collectPrincipalRepayment(address from, uint amount) external whenNotPaused { // Purposefully does nothing except receive money. No share price updates for principal. doERC20Transfer(from, address(this), amount); emit PrincipalCollected(from, amount); } function setTotalFundsLimit(uint amount) public onlyOwner whenNotPaused { totalFundsLimit = amount; emit LimitChanged(msg.sender, &#34;totalFundsLimit&#34;, amount); } function setTransactionLimit(uint amount) public onlyOwner whenNotPaused { transactionLimit = amount; emit LimitChanged(msg.sender, &#34;transactionLimit&#34;, amount); } function transferFrom(address from, address to, uint amount) public onlyOwner whenNotPaused returns (bool) { bool result = doERC20Transfer(from, to, amount); emit TransferMade(from, to, amount); return result; } function enoughBalance(address user, uint amount) public view whenNotPaused returns(bool) { return ERC20UpgradeSafe(erc20address).balanceOf(user) &gt;= amount; } /* Internal Functions */ function poolWithinLimit(uint _totalShares) internal view returns (bool) { return _totalShares.mul(sharePrice).div(mantissa) &lt;= totalFundsLimit; } function transactionWithinLimit(uint amount) internal view returns (bool) { return amount &lt;= transactionLimit; } function getNumShares(uint amount, uint multiplier, uint price) internal pure returns (uint) { return amount.mul(multiplier).div(price); } function doERC20Transfer(address from, address to, uint amount) internal returns (bool) { ERC20UpgradeSafe erc20 = ERC20UpgradeSafe(erc20address); uint balanceBefore = erc20.balanceOf(to); bool success = erc20.transferFrom(from, to, amount); // Calculate the amount that was *actually* transferred uint balanceAfter = erc20.balanceOf(to); require(balanceAfter &gt;= balanceBefore, &#34;Token Transfer Overflow Error&#34;); return success; } function doERC20Withdraw(address payable to, uint amount) internal returns (bool) { ERC20UpgradeSafe erc20 = ERC20UpgradeSafe(erc20address); bool success = erc20.transfer(to, amount); require(success, &#34;Token Withdraw Failed&#34;); return success; } } 漏洞原因\r概括：调用collectInteresPayment时提高了sharePrice，紧接着立即提现时仅需消耗少量share即可提出实际价值更多的asset. asset由全部授权给Pool合约的用户提供。 同时存在逻辑漏洞，允许任意调用偿还函数，导致了SharePrice操纵。 且大户无限授权了该合约，但未存入任何份额，导致成了提款机。\n">
+<title>1219 GoldFinch旧版本Pool合约漏洞</title>
+
+<link rel='canonical' href='https://byebydoggy.github.io/post/2025/1219-goldfinch%E6%97%A7%E7%89%88%E6%9C%ACpool%E5%90%88%E7%BA%A6%E6%BC%8F%E6%B4%9E/'>
+
+<link rel="stylesheet" href="/scss/style.min.4d36f8dc1fd48129e1635deb4b8eb2870fa09474f7280c4cb606d40b2526994b.css"><meta property='og:title' content="1219 GoldFinch旧版本Pool合约漏洞">
+<meta property='og:description' content="相关信息\r交易日志:\n0x3a8bde0a17e04f6a119ae2f28e6b56ac736feb70761e2fa97cac25f816f751c2\n代理合约\n0x0689aa2234d06Ac0d04cdac874331d287aFA4B43\n实际漏洞合约\n0x7dbE30FDE1Eca6856806fF14fc456ec6791c73FE\nPool.sol\n// SPDX-License-Identifier: MIT pragma solidity ^0.6.8; import &#34;@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol&#34;; import &#34;@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol&#34;; import &#34;@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol&#34;; import &#34;@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol&#34;; import &#34;./OwnerPausable.sol&#34;; contract Pool is Initializable, OwnableUpgradeSafe, OwnerPausable { using SafeMath for uint256; uint public sharePrice; uint mantissa; uint public totalShares; mapping(address =&gt; uint) public capitalProviders; address public erc20address; string name; uint public totalFundsLimit = 0; uint public transactionLimit = 0; event DepositMade(address indexed capitalProvider, uint amount); event WithdrawalMade(address indexed capitalProvider, uint amount); event TransferMade(address indexed from, address indexed to, uint amount); event InterestCollected(address indexed payer, uint amount); event PrincipalCollected(address indexed payer, uint amount); event LimitChanged(address indexed owner, string limitType, uint amount); function initialize(address _erc20address, string memory _name, uint _mantissa) public initializer { __Context_init_unchained(); __Ownable_init_unchained(); __OwnerPausable__init(); name = _name; erc20address = _erc20address; mantissa = _mantissa; sharePrice = _mantissa; // Sanity check the address ERC20UpgradeSafe(erc20address).totalSupply(); // Unlock self for infinite amount ERC20UpgradeSafe(erc20address).approve(address(this), uint(-1)); } function deposit(uint amount) external payable whenNotPaused { require(transactionWithinLimit(amount), &#34;Amount is over the per-transaction limit.&#34;); // Determine current shares the address has, and the amount of new shares to be added uint currentShares = capitalProviders[msg.sender]; uint depositShares = getNumShares(amount, mantissa, sharePrice); uint potentialNewTotalShares = totalShares.add(depositShares); require(poolWithinLimit(potentialNewTotalShares), &#34;Deposit would put the Pool over the total limit.&#34;); doERC20Transfer(msg.sender, address(this), amount); // Add the new shares to both the pool and the address totalShares = totalShares.add(depositShares); capitalProviders[msg.sender] = currentShares.add(depositShares); emit DepositMade(msg.sender, amount); } function withdraw(uint amount) external whenNotPaused { // Determine current shares the address has and the shares requested to withdraw require(transactionWithinLimit(amount), &#34;Amount is over the per-transaction limit&#34;); uint currentShares = capitalProviders[msg.sender]; uint withdrawShares = getNumShares(amount, mantissa, sharePrice); // Ensure the address has enough value in the pool require(withdrawShares &lt;= currentShares, &#34;Amount requested is greater than what this address owns&#34;); // Remove the new shares from both the pool and the address totalShares = totalShares.sub(withdrawShares); capitalProviders[msg.sender] = currentShares.sub(withdrawShares); // Send the amount to the address doERC20Transfer(address(this), msg.sender, amount); emit WithdrawalMade(msg.sender, amount); } function collectInterestRepayment(address from, uint amount) external whenNotPaused { doERC20Transfer(from, address(this), amount); uint increment = amount.mul(mantissa).div(totalShares); sharePrice = sharePrice + increment; emit InterestCollected(from, amount); } function collectPrincipalRepayment(address from, uint amount) external whenNotPaused { // Purposefully does nothing except receive money. No share price updates for principal. doERC20Transfer(from, address(this), amount); emit PrincipalCollected(from, amount); } function setTotalFundsLimit(uint amount) public onlyOwner whenNotPaused { totalFundsLimit = amount; emit LimitChanged(msg.sender, &#34;totalFundsLimit&#34;, amount); } function setTransactionLimit(uint amount) public onlyOwner whenNotPaused { transactionLimit = amount; emit LimitChanged(msg.sender, &#34;transactionLimit&#34;, amount); } function transferFrom(address from, address to, uint amount) public onlyOwner whenNotPaused returns (bool) { bool result = doERC20Transfer(from, to, amount); emit TransferMade(from, to, amount); return result; } function enoughBalance(address user, uint amount) public view whenNotPaused returns(bool) { return ERC20UpgradeSafe(erc20address).balanceOf(user) &gt;= amount; } /* Internal Functions */ function poolWithinLimit(uint _totalShares) internal view returns (bool) { return _totalShares.mul(sharePrice).div(mantissa) &lt;= totalFundsLimit; } function transactionWithinLimit(uint amount) internal view returns (bool) { return amount &lt;= transactionLimit; } function getNumShares(uint amount, uint multiplier, uint price) internal pure returns (uint) { return amount.mul(multiplier).div(price); } function doERC20Transfer(address from, address to, uint amount) internal returns (bool) { ERC20UpgradeSafe erc20 = ERC20UpgradeSafe(erc20address); uint balanceBefore = erc20.balanceOf(to); bool success = erc20.transferFrom(from, to, amount); // Calculate the amount that was *actually* transferred uint balanceAfter = erc20.balanceOf(to); require(balanceAfter &gt;= balanceBefore, &#34;Token Transfer Overflow Error&#34;); return success; } function doERC20Withdraw(address payable to, uint amount) internal returns (bool) { ERC20UpgradeSafe erc20 = ERC20UpgradeSafe(erc20address); bool success = erc20.transfer(to, amount); require(success, &#34;Token Withdraw Failed&#34;); return success; } } 漏洞原因\r概括：调用collectInteresPayment时提高了sharePrice，紧接着立即提现时仅需消耗少量share即可提出实际价值更多的asset. asset由全部授权给Pool合约的用户提供。 同时存在逻辑漏洞，允许任意调用偿还函数，导致了SharePrice操纵。 且大户无限授权了该合约，但未存入任何份额，导致成了提款机。\n">
+<meta property='og:url' content='https://byebydoggy.github.io/post/2025/1219-goldfinch%E6%97%A7%E7%89%88%E6%9C%ACpool%E5%90%88%E7%BA%A6%E6%BC%8F%E6%B4%9E/'>
+<meta property='og:site_name' content='Byebyedoggy'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Soldity' /><meta property='article:tag' content='区块链' /><meta property='article:published_time' content='2025-12-19T15:17:19&#43;08:00'/><meta property='article:modified_time' content='2025-12-19T15:17:19&#43;08:00'/><meta property='og:image' content='https://byebydoggy.github.io/cover.png' />
+<meta name="twitter:title" content="1219 GoldFinch旧版本Pool合约漏洞">
+<meta name="twitter:description" content="相关信息\r交易日志:\n0x3a8bde0a17e04f6a119ae2f28e6b56ac736feb70761e2fa97cac25f816f751c2\n代理合约\n0x0689aa2234d06Ac0d04cdac874331d287aFA4B43\n实际漏洞合约\n0x7dbE30FDE1Eca6856806fF14fc456ec6791c73FE\nPool.sol\n// SPDX-License-Identifier: MIT pragma solidity ^0.6.8; import &#34;@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol&#34;; import &#34;@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol&#34;; import &#34;@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol&#34;; import &#34;@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol&#34;; import &#34;./OwnerPausable.sol&#34;; contract Pool is Initializable, OwnableUpgradeSafe, OwnerPausable { using SafeMath for uint256; uint public sharePrice; uint mantissa; uint public totalShares; mapping(address =&gt; uint) public capitalProviders; address public erc20address; string name; uint public totalFundsLimit = 0; uint public transactionLimit = 0; event DepositMade(address indexed capitalProvider, uint amount); event WithdrawalMade(address indexed capitalProvider, uint amount); event TransferMade(address indexed from, address indexed to, uint amount); event InterestCollected(address indexed payer, uint amount); event PrincipalCollected(address indexed payer, uint amount); event LimitChanged(address indexed owner, string limitType, uint amount); function initialize(address _erc20address, string memory _name, uint _mantissa) public initializer { __Context_init_unchained(); __Ownable_init_unchained(); __OwnerPausable__init(); name = _name; erc20address = _erc20address; mantissa = _mantissa; sharePrice = _mantissa; // Sanity check the address ERC20UpgradeSafe(erc20address).totalSupply(); // Unlock self for infinite amount ERC20UpgradeSafe(erc20address).approve(address(this), uint(-1)); } function deposit(uint amount) external payable whenNotPaused { require(transactionWithinLimit(amount), &#34;Amount is over the per-transaction limit.&#34;); // Determine current shares the address has, and the amount of new shares to be added uint currentShares = capitalProviders[msg.sender]; uint depositShares = getNumShares(amount, mantissa, sharePrice); uint potentialNewTotalShares = totalShares.add(depositShares); require(poolWithinLimit(potentialNewTotalShares), &#34;Deposit would put the Pool over the total limit.&#34;); doERC20Transfer(msg.sender, address(this), amount); // Add the new shares to both the pool and the address totalShares = totalShares.add(depositShares); capitalProviders[msg.sender] = currentShares.add(depositShares); emit DepositMade(msg.sender, amount); } function withdraw(uint amount) external whenNotPaused { // Determine current shares the address has and the shares requested to withdraw require(transactionWithinLimit(amount), &#34;Amount is over the per-transaction limit&#34;); uint currentShares = capitalProviders[msg.sender]; uint withdrawShares = getNumShares(amount, mantissa, sharePrice); // Ensure the address has enough value in the pool require(withdrawShares &lt;= currentShares, &#34;Amount requested is greater than what this address owns&#34;); // Remove the new shares from both the pool and the address totalShares = totalShares.sub(withdrawShares); capitalProviders[msg.sender] = currentShares.sub(withdrawShares); // Send the amount to the address doERC20Transfer(address(this), msg.sender, amount); emit WithdrawalMade(msg.sender, amount); } function collectInterestRepayment(address from, uint amount) external whenNotPaused { doERC20Transfer(from, address(this), amount); uint increment = amount.mul(mantissa).div(totalShares); sharePrice = sharePrice + increment; emit InterestCollected(from, amount); } function collectPrincipalRepayment(address from, uint amount) external whenNotPaused { // Purposefully does nothing except receive money. No share price updates for principal. doERC20Transfer(from, address(this), amount); emit PrincipalCollected(from, amount); } function setTotalFundsLimit(uint amount) public onlyOwner whenNotPaused { totalFundsLimit = amount; emit LimitChanged(msg.sender, &#34;totalFundsLimit&#34;, amount); } function setTransactionLimit(uint amount) public onlyOwner whenNotPaused { transactionLimit = amount; emit LimitChanged(msg.sender, &#34;transactionLimit&#34;, amount); } function transferFrom(address from, address to, uint amount) public onlyOwner whenNotPaused returns (bool) { bool result = doERC20Transfer(from, to, amount); emit TransferMade(from, to, amount); return result; } function enoughBalance(address user, uint amount) public view whenNotPaused returns(bool) { return ERC20UpgradeSafe(erc20address).balanceOf(user) &gt;= amount; } /* Internal Functions */ function poolWithinLimit(uint _totalShares) internal view returns (bool) { return _totalShares.mul(sharePrice).div(mantissa) &lt;= totalFundsLimit; } function transactionWithinLimit(uint amount) internal view returns (bool) { return amount &lt;= transactionLimit; } function getNumShares(uint amount, uint multiplier, uint price) internal pure returns (uint) { return amount.mul(multiplier).div(price); } function doERC20Transfer(address from, address to, uint amount) internal returns (bool) { ERC20UpgradeSafe erc20 = ERC20UpgradeSafe(erc20address); uint balanceBefore = erc20.balanceOf(to); bool success = erc20.transferFrom(from, to, amount); // Calculate the amount that was *actually* transferred uint balanceAfter = erc20.balanceOf(to); require(balanceAfter &gt;= balanceBefore, &#34;Token Transfer Overflow Error&#34;); return success; } function doERC20Withdraw(address payable to, uint amount) internal returns (bool) { ERC20UpgradeSafe erc20 = ERC20UpgradeSafe(erc20address); bool success = erc20.transfer(to, amount); require(success, &#34;Token Withdraw Failed&#34;); return success; } } 漏洞原因\r概括：调用collectInteresPayment时提高了sharePrice，紧接着立即提现时仅需消耗少量share即可提出实际价值更多的asset. asset由全部授权给Pool合约的用户提供。 同时存在逻辑漏洞，允许任意调用偿还函数，导致了SharePrice操纵。 且大户无限授权了该合约，但未存入任何份额，导致成了提款机。\n"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://byebydoggy.github.io/cover.png' />
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column compact"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_8ac7c2653184b428.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Byebyedoggy</a></h1>
+            <h2 class="site-description"></h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    
+
+            <main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/post/2025/1219-goldfinch%E6%97%A7%E7%89%88%E6%9C%ACpool%E5%90%88%E7%BA%A6%E6%BC%8F%E6%B4%9E/">
+                
+                    <img src="/cover.png" loading="lazy" alt="Featured image of post 1219 GoldFinch旧版本Pool合约漏洞" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/" >
+                区块链
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/post/2025/1219-goldfinch%E6%97%A7%E7%89%88%E6%9C%ACpool%E5%90%88%E7%BA%A6%E6%BC%8F%E6%B4%9E/">1219 GoldFinch旧版本Pool合约漏洞</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published" datetime='2025-12-19T15:17:19&#43;08:00'>Dec 19, 2025</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 3 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="相关信息">相关信息
+</h1><p>交易日志:</p>
+<p>0x3a8bde0a17e04f6a119ae2f28e6b56ac736feb70761e2fa97cac25f816f751c2</p>
+<p>代理合约</p>
+<p>0x0689aa2234d06Ac0d04cdac874331d287aFA4B43</p>
+<p>实际漏洞合约</p>
+<p>0x7dbE30FDE1Eca6856806fF14fc456ec6791c73FE</p>
+<p>Pool.sol</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-solidity" data-lang="solidity"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// SPDX-License-Identifier: MIT
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pragma solidity</span> <span style="color:#f92672">^</span><span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">6</span>.<span style="color:#ae81ff">8</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> <span style="color:#e6db74">&#34;@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol&#34;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> <span style="color:#e6db74">&#34;@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol&#34;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> <span style="color:#e6db74">&#34;@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol&#34;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> <span style="color:#e6db74">&#34;@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol&#34;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> <span style="color:#e6db74">&#34;./OwnerPausable.sol&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">contract</span> <span style="color:#a6e22e">Pool</span> <span style="color:#66d9ef">is</span> Initializable, OwnableUpgradeSafe, OwnerPausable {
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">using</span> SafeMath <span style="color:#66d9ef">for</span> <span style="color:#66d9ef">uint256</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">uint</span> <span style="color:#66d9ef">public</span> sharePrice;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">uint</span> mantissa;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">uint</span> <span style="color:#66d9ef">public</span> totalShares;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">mapping</span>(<span style="color:#66d9ef">address</span> <span style="color:#f92672">=&gt;</span> <span style="color:#66d9ef">uint</span>) <span style="color:#66d9ef">public</span> capitalProviders;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">address</span> <span style="color:#66d9ef">public</span> erc20address;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">string</span> name;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">uint</span> <span style="color:#66d9ef">public</span> totalFundsLimit <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">uint</span> <span style="color:#66d9ef">public</span> transactionLimit <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">event</span> <span style="color:#a6e22e">DepositMade</span>(<span style="color:#66d9ef">address</span> <span style="color:#66d9ef">indexed</span> capitalProvider, <span style="color:#66d9ef">uint</span> amount);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">event</span> <span style="color:#a6e22e">WithdrawalMade</span>(<span style="color:#66d9ef">address</span> <span style="color:#66d9ef">indexed</span> capitalProvider, <span style="color:#66d9ef">uint</span> amount);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">event</span> <span style="color:#a6e22e">TransferMade</span>(<span style="color:#66d9ef">address</span> <span style="color:#66d9ef">indexed</span> <span style="color:#66d9ef">from</span>, <span style="color:#66d9ef">address</span> <span style="color:#66d9ef">indexed</span> to, <span style="color:#66d9ef">uint</span> amount);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">event</span> <span style="color:#a6e22e">InterestCollected</span>(<span style="color:#66d9ef">address</span> <span style="color:#66d9ef">indexed</span> payer, <span style="color:#66d9ef">uint</span> amount);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">event</span> <span style="color:#a6e22e">PrincipalCollected</span>(<span style="color:#66d9ef">address</span> <span style="color:#66d9ef">indexed</span> payer, <span style="color:#66d9ef">uint</span> amount);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">event</span> <span style="color:#a6e22e">LimitChanged</span>(<span style="color:#66d9ef">address</span> <span style="color:#66d9ef">indexed</span> owner, <span style="color:#66d9ef">string</span> limitType, <span style="color:#66d9ef">uint</span> amount);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">initialize</span>(<span style="color:#66d9ef">address</span> _erc20address, <span style="color:#66d9ef">string</span> <span style="color:#66d9ef">memory</span> _name, <span style="color:#66d9ef">uint</span> _mantissa) <span style="color:#66d9ef">public</span> initializer {
+</span></span><span style="display:flex;"><span>    __Context_init_unchained();
+</span></span><span style="display:flex;"><span>    __Ownable_init_unchained();
+</span></span><span style="display:flex;"><span>    __OwnerPausable__init();
+</span></span><span style="display:flex;"><span>    name <span style="color:#f92672">=</span> _name;
+</span></span><span style="display:flex;"><span>    erc20address <span style="color:#f92672">=</span> _erc20address;
+</span></span><span style="display:flex;"><span>    mantissa <span style="color:#f92672">=</span> _mantissa;
+</span></span><span style="display:flex;"><span>    sharePrice <span style="color:#f92672">=</span> _mantissa;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Sanity check the address
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    ERC20UpgradeSafe(erc20address).totalSupply();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Unlock self for infinite amount
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    ERC20UpgradeSafe(erc20address).approve(<span style="color:#66d9ef">address</span>(this), <span style="color:#66d9ef">uint</span>(<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>));
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">deposit</span>(<span style="color:#66d9ef">uint</span> amount) <span style="color:#66d9ef">external</span> <span style="color:#66d9ef">payable</span> whenNotPaused {
+</span></span><span style="display:flex;"><span>    require(transactionWithinLimit(amount), <span style="color:#e6db74">&#34;Amount is over the per-transaction limit.&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Determine current shares the address has, and the amount of new shares to be added
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">uint</span> currentShares <span style="color:#f92672">=</span> capitalProviders[msg.sender];
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint</span> depositShares <span style="color:#f92672">=</span> getNumShares(amount, mantissa, sharePrice);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint</span> potentialNewTotalShares <span style="color:#f92672">=</span> totalShares.add(depositShares);
+</span></span><span style="display:flex;"><span>    require(poolWithinLimit(potentialNewTotalShares), <span style="color:#e6db74">&#34;Deposit would put the Pool over the total limit.&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    doERC20Transfer(msg.sender, <span style="color:#66d9ef">address</span>(this), amount);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Add the new shares to both the pool and the address
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    totalShares <span style="color:#f92672">=</span> totalShares.add(depositShares);
+</span></span><span style="display:flex;"><span>    capitalProviders[msg.sender] <span style="color:#f92672">=</span> currentShares.add(depositShares);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    emit DepositMade(msg.sender, amount);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">withdraw</span>(<span style="color:#66d9ef">uint</span> amount) <span style="color:#66d9ef">external</span> whenNotPaused {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Determine current shares the address has and the shares requested to withdraw
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    require(transactionWithinLimit(amount), <span style="color:#e6db74">&#34;Amount is over the per-transaction limit&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint</span> currentShares <span style="color:#f92672">=</span> capitalProviders[msg.sender];
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint</span> withdrawShares <span style="color:#f92672">=</span> getNumShares(amount, mantissa, sharePrice);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Ensure the address has enough value in the pool
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    require(withdrawShares <span style="color:#f92672">&lt;=</span> currentShares, <span style="color:#e6db74">&#34;Amount requested is greater than what this address owns&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Remove the new shares from both the pool and the address
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    totalShares <span style="color:#f92672">=</span> totalShares.sub(withdrawShares);
+</span></span><span style="display:flex;"><span>    capitalProviders[msg.sender] <span style="color:#f92672">=</span> currentShares.sub(withdrawShares);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Send the amount to the address
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    doERC20Transfer(<span style="color:#66d9ef">address</span>(this), msg.sender, amount);
+</span></span><span style="display:flex;"><span>    emit WithdrawalMade(msg.sender, amount);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">collectInterestRepayment</span>(<span style="color:#66d9ef">address</span> <span style="color:#66d9ef">from</span>, <span style="color:#66d9ef">uint</span> amount) <span style="color:#66d9ef">external</span> whenNotPaused {
+</span></span><span style="display:flex;"><span>    doERC20Transfer(<span style="color:#66d9ef">from</span>, <span style="color:#66d9ef">address</span>(this), amount);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint</span> increment <span style="color:#f92672">=</span> amount.mul(mantissa).div(totalShares);
+</span></span><span style="display:flex;"><span>    sharePrice <span style="color:#f92672">=</span> sharePrice <span style="color:#f92672">+</span> increment;
+</span></span><span style="display:flex;"><span>    emit InterestCollected(<span style="color:#66d9ef">from</span>, amount);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">collectPrincipalRepayment</span>(<span style="color:#66d9ef">address</span> <span style="color:#66d9ef">from</span>, <span style="color:#66d9ef">uint</span> amount) <span style="color:#66d9ef">external</span> whenNotPaused {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Purposefully does nothing except receive money. No share price updates for principal.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    doERC20Transfer(<span style="color:#66d9ef">from</span>, <span style="color:#66d9ef">address</span>(this), amount);
+</span></span><span style="display:flex;"><span>    emit PrincipalCollected(<span style="color:#66d9ef">from</span>, amount);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">setTotalFundsLimit</span>(<span style="color:#66d9ef">uint</span> amount) <span style="color:#66d9ef">public</span> onlyOwner whenNotPaused {
+</span></span><span style="display:flex;"><span>    totalFundsLimit <span style="color:#f92672">=</span> amount;
+</span></span><span style="display:flex;"><span>    emit LimitChanged(msg.sender, <span style="color:#e6db74">&#34;totalFundsLimit&#34;</span>, amount);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">setTransactionLimit</span>(<span style="color:#66d9ef">uint</span> amount) <span style="color:#66d9ef">public</span> onlyOwner whenNotPaused {
+</span></span><span style="display:flex;"><span>    transactionLimit <span style="color:#f92672">=</span> amount;
+</span></span><span style="display:flex;"><span>    emit LimitChanged(msg.sender, <span style="color:#e6db74">&#34;transactionLimit&#34;</span>, amount);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">transferFrom</span>(<span style="color:#66d9ef">address</span> <span style="color:#66d9ef">from</span>, <span style="color:#66d9ef">address</span> to, <span style="color:#66d9ef">uint</span> amount) <span style="color:#66d9ef">public</span> onlyOwner whenNotPaused <span style="color:#66d9ef">returns</span> (<span style="color:#66d9ef">bool</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">bool</span> result <span style="color:#f92672">=</span> doERC20Transfer(<span style="color:#66d9ef">from</span>, to, amount);
+</span></span><span style="display:flex;"><span>    emit TransferMade(<span style="color:#66d9ef">from</span>, to, amount);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> result;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">enoughBalance</span>(<span style="color:#66d9ef">address</span> user, <span style="color:#66d9ef">uint</span> amount) <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">view</span> whenNotPaused <span style="color:#66d9ef">returns</span>(<span style="color:#66d9ef">bool</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> ERC20UpgradeSafe(erc20address).balanceOf(user) <span style="color:#f92672">&gt;=</span> amount;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">/* Internal Functions */</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">poolWithinLimit</span>(<span style="color:#66d9ef">uint</span> _totalShares) <span style="color:#66d9ef">internal</span> <span style="color:#66d9ef">view</span> <span style="color:#66d9ef">returns</span> (<span style="color:#66d9ef">bool</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> _totalShares.mul(sharePrice).div(mantissa) <span style="color:#f92672">&lt;=</span> totalFundsLimit;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">transactionWithinLimit</span>(<span style="color:#66d9ef">uint</span> amount) <span style="color:#66d9ef">internal</span> <span style="color:#66d9ef">view</span> <span style="color:#66d9ef">returns</span> (<span style="color:#66d9ef">bool</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> amount <span style="color:#f92672">&lt;=</span> transactionLimit;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">getNumShares</span>(<span style="color:#66d9ef">uint</span> amount, <span style="color:#66d9ef">uint</span> multiplier, <span style="color:#66d9ef">uint</span> price) <span style="color:#66d9ef">internal</span> <span style="color:#66d9ef">pure</span> <span style="color:#66d9ef">returns</span> (<span style="color:#66d9ef">uint</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> amount.mul(multiplier).div(price);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">doERC20Transfer</span>(<span style="color:#66d9ef">address</span> <span style="color:#66d9ef">from</span>, <span style="color:#66d9ef">address</span> to, <span style="color:#66d9ef">uint</span> amount) <span style="color:#66d9ef">internal</span> <span style="color:#66d9ef">returns</span> (<span style="color:#66d9ef">bool</span>) {
+</span></span><span style="display:flex;"><span>    ERC20UpgradeSafe erc20 <span style="color:#f92672">=</span> ERC20UpgradeSafe(erc20address);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">uint</span> balanceBefore <span style="color:#f92672">=</span> erc20.balanceOf(to);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">bool</span> success <span style="color:#f92672">=</span> erc20.transferFrom(<span style="color:#66d9ef">from</span>, to, amount);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Calculate the amount that was *actually* transferred
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">uint</span> balanceAfter <span style="color:#f92672">=</span> erc20.balanceOf(to);
+</span></span><span style="display:flex;"><span>    require(balanceAfter <span style="color:#f92672">&gt;=</span> balanceBefore, <span style="color:#e6db74">&#34;Token Transfer Overflow Error&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> success;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">doERC20Withdraw</span>(<span style="color:#66d9ef">address</span> <span style="color:#66d9ef">payable</span> to, <span style="color:#66d9ef">uint</span> amount) <span style="color:#66d9ef">internal</span> <span style="color:#66d9ef">returns</span> (<span style="color:#66d9ef">bool</span>) {
+</span></span><span style="display:flex;"><span>    ERC20UpgradeSafe erc20 <span style="color:#f92672">=</span> ERC20UpgradeSafe(erc20address);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">bool</span> success <span style="color:#f92672">=</span> erc20.transfer(to, amount);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    require(success, <span style="color:#e6db74">&#34;Token Withdraw Failed&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> success;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h1 id="漏洞原因">漏洞原因
+</h1><p>概括：调用collectInteresPayment时提高了sharePrice，紧接着立即提现时仅需消耗少量share即可提出实际价值更多的asset.  asset由全部授权给Pool合约的用户提供。 同时存在逻辑漏洞，允许任意调用偿还函数，导致了SharePrice操纵。 且大户无限授权了该合约，但未存入任何份额，导致成了提款机。</p>
+<p>漏洞还需要一个条件就是当前Pool合约的总份额极低，否则攻击者投入成本不足以覆盖收益。此处攻击投入成本10000U，获利350000.</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/soldity/">Soldity</a>
+        
+            <a href="/tags/%E5%8C%BA%E5%9D%97%E9%93%BE/">区块链</a>
+        
+    </section>
+
+
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/post/2025/1218-abracadabramim_spell-cauldronv4%E5%90%88%E7%BA%A6%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/cover.png" loading="lazy" data-key="1218 Abracadabra(MIM_SPELL) CauldronV4合约漏洞分析" data-hash="/cover.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">1218 Abracadabra(MIM_SPELL) CauldronV4合约漏洞分析</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/2025/%E6%9F%90%E5%8A%A0%E5%AF%86%E8%B4%A7%E5%B8%81%E9%A2%84%E6%B5%8B%E5%B8%82%E5%9C%BA%E6%8F%90%E7%8E%B0%E6%8E%A5%E5%8F%A3%E6%BC%8F%E6%B4%9E/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/cover.png" loading="lazy" data-key="某加密货币预测市场提现接口漏洞" data-hash="/cover.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">某加密货币预测市场提现接口漏洞</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/2025/2025-11-23-port3-hack/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/cover.png" loading="lazy" data-key="2025 11 23 Port3 Hack" data-hash="/cover.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">2025 11 23 Port3 Hack</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/2025/arkm%E5%89%8D%E7%AB%AF%E9%80%86%E5%90%91/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/cover.png" loading="lazy" data-key="ARKM前端逆向" data-hash="/cover.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">ARKM前端逆向</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/post/2025/%E4%BA%A4%E6%98%93%E6%A1%86%E6%9E%B6marketdatacollector/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/cover.png" loading="lazy" data-key="交易框架|MarketDataCollector" data-hash="/cover.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">交易框架|MarketDataCollector</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+        2025 Byebyedoggy
+    </section>
+    
+    <section class="powerby">
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.32.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.c922af694cc257bf1ecc41c0dd7b0430f9114ec280ccf67cd2c6ad55f5316c4e.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

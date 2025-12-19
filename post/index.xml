@@ -6,7 +6,173 @@
         <description>Recent content in Posts on Byebyedoggy</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
-        <lastBuildDate>Thu, 18 Dec 2025 18:22:21 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/post/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Fri, 19 Dec 2025 15:17:19 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/post/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>1219 GoldFinch旧版本Pool合约漏洞</title>
+        <link>https://byebydoggy.github.io/post/2025/1219-goldfinch%E6%97%A7%E7%89%88%E6%9C%ACpool%E5%90%88%E7%BA%A6%E6%BC%8F%E6%B4%9E/</link>
+        <pubDate>Fri, 19 Dec 2025 15:17:19 +0800</pubDate>
+        
+        <guid>https://byebydoggy.github.io/post/2025/1219-goldfinch%E6%97%A7%E7%89%88%E6%9C%ACpool%E5%90%88%E7%BA%A6%E6%BC%8F%E6%B4%9E/</guid>
+        <description>&lt;img src="https://byebydoggy.github.io/cover.png" alt="Featured image of post 1219 GoldFinch旧版本Pool合约漏洞" /&gt;&lt;h1 id=&#34;相关信息&#34;&gt;相关信息
+&lt;/h1&gt;&lt;p&gt;交易日志:&lt;/p&gt;
+&lt;p&gt;0x3a8bde0a17e04f6a119ae2f28e6b56ac736feb70761e2fa97cac25f816f751c2&lt;/p&gt;
+&lt;p&gt;代理合约&lt;/p&gt;
+&lt;p&gt;0x0689aa2234d06Ac0d04cdac874331d287aFA4B43&lt;/p&gt;
+&lt;p&gt;实际漏洞合约&lt;/p&gt;
+&lt;p&gt;0x7dbE30FDE1Eca6856806fF14fc456ec6791c73FE&lt;/p&gt;
+&lt;p&gt;Pool.sol&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-solidity&#34; data-lang=&#34;solidity&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// SPDX-License-Identifier: MIT
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;pragma solidity&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;^&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;.&lt;span style=&#34;color:#ae81ff&#34;&gt;6&lt;/span&gt;.&lt;span style=&#34;color:#ae81ff&#34;&gt;8&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;./OwnerPausable.sol&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;contract&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Pool&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;is&lt;/span&gt; Initializable, OwnableUpgradeSafe, OwnerPausable {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#f92672&#34;&gt;using&lt;/span&gt; SafeMath &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;uint256&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; sharePrice;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; mantissa;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; totalShares;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;mapping&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;address&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;=&amp;gt;&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt;) &lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; capitalProviders;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;address&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; erc20address;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;string&lt;/span&gt; name;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; totalFundsLimit &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; transactionLimit &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;event&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;DepositMade&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;address&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;indexed&lt;/span&gt; capitalProvider, &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; amount);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;event&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;WithdrawalMade&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;address&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;indexed&lt;/span&gt; capitalProvider, &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; amount);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;event&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;TransferMade&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;address&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;indexed&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;from&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;address&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;indexed&lt;/span&gt; to, &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; amount);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;event&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;InterestCollected&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;address&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;indexed&lt;/span&gt; payer, &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; amount);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;event&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;PrincipalCollected&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;address&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;indexed&lt;/span&gt; payer, &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; amount);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;event&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;LimitChanged&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;address&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;indexed&lt;/span&gt; owner, &lt;span style=&#34;color:#66d9ef&#34;&gt;string&lt;/span&gt; limitType, &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; amount);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;initialize&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;address&lt;/span&gt; _erc20address, &lt;span style=&#34;color:#66d9ef&#34;&gt;string&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;memory&lt;/span&gt; _name, &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; _mantissa) &lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; initializer {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    __Context_init_unchained();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    __Ownable_init_unchained();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    __OwnerPausable__init();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    name &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; _name;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    erc20address &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; _erc20address;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    mantissa &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; _mantissa;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    sharePrice &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; _mantissa;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;// Sanity check the address
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    ERC20UpgradeSafe(erc20address).totalSupply();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;// Unlock self for infinite amount
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    ERC20UpgradeSafe(erc20address).approve(&lt;span style=&#34;color:#66d9ef&#34;&gt;address&lt;/span&gt;(this), &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt;(&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;));
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;deposit&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; amount) &lt;span style=&#34;color:#66d9ef&#34;&gt;external&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;payable&lt;/span&gt; whenNotPaused {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    require(transactionWithinLimit(amount), &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Amount is over the per-transaction limit.&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;// Determine current shares the address has, and the amount of new shares to be added
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; currentShares &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; capitalProviders[msg.sender];
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; depositShares &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; getNumShares(amount, mantissa, sharePrice);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; potentialNewTotalShares &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; totalShares.add(depositShares);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    require(poolWithinLimit(potentialNewTotalShares), &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Deposit would put the Pool over the total limit.&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    doERC20Transfer(msg.sender, &lt;span style=&#34;color:#66d9ef&#34;&gt;address&lt;/span&gt;(this), amount);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;// Add the new shares to both the pool and the address
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    totalShares &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; totalShares.add(depositShares);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    capitalProviders[msg.sender] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; currentShares.add(depositShares);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    emit DepositMade(msg.sender, amount);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;withdraw&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; amount) &lt;span style=&#34;color:#66d9ef&#34;&gt;external&lt;/span&gt; whenNotPaused {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;// Determine current shares the address has and the shares requested to withdraw
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    require(transactionWithinLimit(amount), &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Amount is over the per-transaction limit&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; currentShares &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; capitalProviders[msg.sender];
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; withdrawShares &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; getNumShares(amount, mantissa, sharePrice);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;// Ensure the address has enough value in the pool
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    require(withdrawShares &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;=&lt;/span&gt; currentShares, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Amount requested is greater than what this address owns&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;// Remove the new shares from both the pool and the address
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    totalShares &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; totalShares.sub(withdrawShares);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    capitalProviders[msg.sender] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; currentShares.sub(withdrawShares);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;// Send the amount to the address
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    doERC20Transfer(&lt;span style=&#34;color:#66d9ef&#34;&gt;address&lt;/span&gt;(this), msg.sender, amount);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    emit WithdrawalMade(msg.sender, amount);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;collectInterestRepayment&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;address&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;from&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; amount) &lt;span style=&#34;color:#66d9ef&#34;&gt;external&lt;/span&gt; whenNotPaused {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    doERC20Transfer(&lt;span style=&#34;color:#66d9ef&#34;&gt;from&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;address&lt;/span&gt;(this), amount);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; increment &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; amount.mul(mantissa).div(totalShares);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    sharePrice &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; sharePrice &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt; increment;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    emit InterestCollected(&lt;span style=&#34;color:#66d9ef&#34;&gt;from&lt;/span&gt;, amount);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;collectPrincipalRepayment&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;address&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;from&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; amount) &lt;span style=&#34;color:#66d9ef&#34;&gt;external&lt;/span&gt; whenNotPaused {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;// Purposefully does nothing except receive money. No share price updates for principal.
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    doERC20Transfer(&lt;span style=&#34;color:#66d9ef&#34;&gt;from&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;address&lt;/span&gt;(this), amount);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    emit PrincipalCollected(&lt;span style=&#34;color:#66d9ef&#34;&gt;from&lt;/span&gt;, amount);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;setTotalFundsLimit&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; amount) &lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; onlyOwner whenNotPaused {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    totalFundsLimit &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; amount;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    emit LimitChanged(msg.sender, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;totalFundsLimit&amp;#34;&lt;/span&gt;, amount);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;setTransactionLimit&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; amount) &lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; onlyOwner whenNotPaused {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    transactionLimit &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; amount;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    emit LimitChanged(msg.sender, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;transactionLimit&amp;#34;&lt;/span&gt;, amount);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;transferFrom&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;address&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;from&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;address&lt;/span&gt; to, &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; amount) &lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; onlyOwner whenNotPaused &lt;span style=&#34;color:#66d9ef&#34;&gt;returns&lt;/span&gt; (&lt;span style=&#34;color:#66d9ef&#34;&gt;bool&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;bool&lt;/span&gt; result &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; doERC20Transfer(&lt;span style=&#34;color:#66d9ef&#34;&gt;from&lt;/span&gt;, to, amount);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    emit TransferMade(&lt;span style=&#34;color:#66d9ef&#34;&gt;from&lt;/span&gt;, to, amount);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; result;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;enoughBalance&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;address&lt;/span&gt; user, &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; amount) &lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;view&lt;/span&gt; whenNotPaused &lt;span style=&#34;color:#66d9ef&#34;&gt;returns&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;bool&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; ERC20UpgradeSafe(erc20address).balanceOf(user) &lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;=&lt;/span&gt; amount;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#75715e&#34;&gt;/* Internal Functions */&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;poolWithinLimit&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; _totalShares) &lt;span style=&#34;color:#66d9ef&#34;&gt;internal&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;view&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;returns&lt;/span&gt; (&lt;span style=&#34;color:#66d9ef&#34;&gt;bool&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; _totalShares.mul(sharePrice).div(mantissa) &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;=&lt;/span&gt; totalFundsLimit;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;transactionWithinLimit&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; amount) &lt;span style=&#34;color:#66d9ef&#34;&gt;internal&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;view&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;returns&lt;/span&gt; (&lt;span style=&#34;color:#66d9ef&#34;&gt;bool&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; amount &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;=&lt;/span&gt; transactionLimit;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;getNumShares&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; amount, &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; multiplier, &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; price) &lt;span style=&#34;color:#66d9ef&#34;&gt;internal&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;pure&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;returns&lt;/span&gt; (&lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; amount.mul(multiplier).div(price);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;doERC20Transfer&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;address&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;from&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;address&lt;/span&gt; to, &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; amount) &lt;span style=&#34;color:#66d9ef&#34;&gt;internal&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;returns&lt;/span&gt; (&lt;span style=&#34;color:#66d9ef&#34;&gt;bool&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ERC20UpgradeSafe erc20 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; ERC20UpgradeSafe(erc20address);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; balanceBefore &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; erc20.balanceOf(to);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;bool&lt;/span&gt; success &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; erc20.transferFrom(&lt;span style=&#34;color:#66d9ef&#34;&gt;from&lt;/span&gt;, to, amount);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;// Calculate the amount that was *actually* transferred
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; balanceAfter &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; erc20.balanceOf(to);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    require(balanceAfter &lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;=&lt;/span&gt; balanceBefore, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Token Transfer Overflow Error&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; success;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;function&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;doERC20Withdraw&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;address&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;payable&lt;/span&gt; to, &lt;span style=&#34;color:#66d9ef&#34;&gt;uint&lt;/span&gt; amount) &lt;span style=&#34;color:#66d9ef&#34;&gt;internal&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;returns&lt;/span&gt; (&lt;span style=&#34;color:#66d9ef&#34;&gt;bool&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    ERC20UpgradeSafe erc20 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; ERC20UpgradeSafe(erc20address);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;bool&lt;/span&gt; success &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; erc20.transfer(to, amount);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    require(success, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Token Withdraw Failed&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; success;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h1 id=&#34;漏洞原因&#34;&gt;漏洞原因
+&lt;/h1&gt;&lt;p&gt;概括：调用collectInteresPayment时提高了sharePrice，紧接着立即提现时仅需消耗少量share即可提出实际价值更多的asset.  asset由全部授权给Pool合约的用户提供。 同时存在逻辑漏洞，允许任意调用偿还函数，导致了SharePrice操纵。 且大户无限授权了该合约，但未存入任何份额，导致成了提款机。&lt;/p&gt;
+&lt;p&gt;漏洞还需要一个条件就是当前Pool合约的总份额极低，否则攻击者投入成本不足以覆盖收益。此处攻击投入成本10000U，获利350000.&lt;/p&gt;
+</description>
+        </item>
+        <item>
         <title>1218 Abracadabra(MIM_SPELL) CauldronV4合约漏洞分析</title>
         <link>https://byebydoggy.github.io/post/2025/1218-abracadabramim_spell-cauldronv4%E5%90%88%E7%BA%A6%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/</link>
         <pubDate>Thu, 18 Dec 2025 18:22:21 +0800</pubDate>

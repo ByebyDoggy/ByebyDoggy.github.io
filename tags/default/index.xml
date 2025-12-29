@@ -6,7 +6,101 @@
         <description>Recent content in Default on Byebyedoggy</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
-        <lastBuildDate>Fri, 05 Dec 2025 19:31:10 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/tags/default/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Mon, 29 Dec 2025 14:46:54 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/tags/default/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>1229 PHPEMS Points Race Condition POC</title>
+        <link>https://byebydoggy.github.io/post/2025/1229-phpems-points-race-condition-poc/</link>
+        <pubDate>Mon, 29 Dec 2025 14:46:54 +0800</pubDate>
+        
+        <guid>https://byebydoggy.github.io/post/2025/1229-phpems-points-race-condition-poc/</guid>
+        <description>&lt;img src="https://byebydoggy.github.io/cover.png" alt="Featured image of post 1229 PHPEMS Points Race Condition POC" /&gt;&lt;h1 id=&#34;vulnerability-information&#34;&gt;Vulnerability Information
+&lt;/h1&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Item&lt;/th&gt;
+          &lt;th&gt;Details&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Vulnerability Name&lt;/td&gt;
+          &lt;td&gt;PHPEMS Points Concurrent Usage Race Condition Vulnerability&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Affected Versions&lt;/td&gt;
+          &lt;td&gt;PHPEMS 11.0 and earlier&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Type&lt;/td&gt;
+          &lt;td&gt;Logic Flaw&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Severity&lt;/td&gt;
+          &lt;td&gt;Medium&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h1 id=&#34;reproduction-environment&#34;&gt;Reproduction Environment
+&lt;/h1&gt;&lt;ol&gt;
+&lt;li&gt;Test Site: Local deployment&lt;/li&gt;
+&lt;li&gt;Source Code Setup: Download any version from the official website: &lt;a class=&#34;link&#34; href=&#34;https://www.phpems.net/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://www.phpems.net/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Tool: Burp Suite&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h1 id=&#34;reproduction-steps&#34;&gt;Reproduction Steps
+&lt;/h1&gt;&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Prepare data: Obtain a valid PHPEMS user account that has sufficient points for purchasing courses.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Create a points-consuming course: Set up a course in the system that requires points to access/purchase (configure the course to deduct points upon successful purchase).&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Capture the course purchase request: Use Burp Suite to intercept the HTTP request generated when clicking the &amp;ldquo;Purchase Course&amp;rdquo; button with the prepared account. This request is the core endpoint for points consumption.
+&lt;img src=&#34;https://byebydoggy.github.io/phpems/pic6.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Conduct concurrent testing: Import the captured request into Burp Suite Turbo Intruder, load a race condition script, and send multiple concurrent requests simultaneously.
+&lt;img src=&#34;https://byebydoggy.github.io/phpems/pic7.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Verify the result: Check the system backend and user account— the same points-consuming course is successfully purchased more than 10 times, while the user’s points are not deducted proportionally (or only partially deducted).&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;Verification Result&lt;/strong&gt; : A single coupon can be used to recharge all accounts.Only one coupon redemption record is logged in the backend system.&lt;/p&gt;
+&lt;h1 id=&#34;impact&#34;&gt;Impact
+&lt;/h1&gt;&lt;ul&gt;
+&lt;li&gt;Attackers can maliciously obtain unauthorized access to paid courses or virtual assets by exploiting the mismatch between points deduction and transaction records.&lt;/li&gt;
+&lt;li&gt;If the platform’s points are convertible to real currency or require monetary payment to acquire, the vulnerability may result in direct economic losses for the platform.&lt;/li&gt;
+&lt;li&gt;Compromises the fairness of the platform’s virtual asset system and undermines user trust.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;mitigation-recommendations&#34;&gt;Mitigation Recommendations
+&lt;/h1&gt;&lt;ol&gt;
+&lt;li&gt;Implement database row-level locking (e.g., MySQL FOR UPDATE clause) for points consumption operations to ensure that concurrent requests are processed serially and avoid race conditions.&lt;/li&gt;
+&lt;li&gt;Add real-time validation of points balance and consumption status before executing each points-deducting transaction. Reject the request immediately if the remaining points are insufficient.&lt;/li&gt;
+&lt;li&gt;Introduce a transaction log mechanism: Record each points consumption event with a unique transaction ID, and verify the consistency between transaction records and points balance after concurrent operations.&lt;/li&gt;
+&lt;li&gt;Restrict the frequency of concurrent requests for points-consuming actions (e.g., limit the number of course purchase requests per account within a specific time window) to prevent abuse.&lt;/li&gt;
+&lt;/ol&gt;
+</description>
+        </item>
+        <item>
         <title>CVE-2025-55182</title>
         <link>https://byebydoggy.github.io/post/2025/cve-2025-55182/</link>
         <pubDate>Fri, 05 Dec 2025 19:31:10 +0800</pubDate>

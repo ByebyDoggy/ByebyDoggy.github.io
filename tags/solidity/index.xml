@@ -6,7 +6,21 @@
         <description>Recent content in Solidity on Byebyedoggy</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
-        <lastBuildDate>Thu, 18 Dec 2025 18:22:21 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/tags/solidity/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sat, 20 Dec 2025 20:41:07 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/tags/solidity/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>1220 DexodusFinance价格更新脆弱漏洞</title>
+        <link>https://byebydoggy.github.io/post/2025/1220-dexodusfinance%E4%BB%B7%E6%A0%BC%E6%9B%B4%E6%96%B0%E8%84%86%E5%BC%B1%E6%BC%8F%E6%B4%9E/</link>
+        <pubDate>Sat, 20 Dec 2025 20:41:07 +0800</pubDate>
+        
+        <guid>https://byebydoggy.github.io/post/2025/1220-dexodusfinance%E4%BB%B7%E6%A0%BC%E6%9B%B4%E6%96%B0%E8%84%86%E5%BC%B1%E6%BC%8F%E6%B4%9E/</guid>
+        <description>&lt;img src="https://byebydoggy.github.io/cover.png" alt="Featured image of post 1220 DexodusFinance价格更新脆弱漏洞" /&gt;&lt;h1 id=&#34;基本信息&#34;&gt;基本信息
+&lt;/h1&gt;&lt;p&gt;攻击日志:app.blocksec.com/explorer/tx/base/0x7501847c70d2cdcfbb8c6bd3585640f568cd287242b64027e5a829646e084257&lt;/p&gt;
+&lt;p&gt;攻击路径:闪电贷-&amp;gt;Dex开多头仓位-&amp;gt;随后立即平仓，期间收益达到百分之5，300万本金，收益15万u。  据BlockSec所说，并参考LP池合约开源的代码，推测应该是依靠单一预言机故障，属于价格更新脆弱漏洞。&lt;/p&gt;
+&lt;h1 id=&#34;漏洞合约&#34;&gt;漏洞合约
+&lt;/h1&gt;&lt;p&gt;开发者已经删库跑路，看不到合约内容了。。。&lt;/p&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;&#34; &gt;https://github.com/DexodusGenesis/dexodus&lt;/a&gt;&lt;/p&gt;
+</description>
+        </item>
+        <item>
         <title>1218 Abracadabra(MIM_SPELL) CauldronV4合约漏洞分析</title>
         <link>https://byebydoggy.github.io/post/2025/1218-abracadabramim_spell-cauldronv4%E5%90%88%E7%BA%A6%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/</link>
         <pubDate>Thu, 18 Dec 2025 18:22:21 +0800</pubDate>

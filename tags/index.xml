@@ -6,28 +6,60 @@
         <description>Recent content in Tags on Byebyedoggy</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
-        <lastBuildDate>Fri, 19 Dec 2025 15:17:19 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/tags/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>Soldity</title>
-        <link>https://byebydoggy.github.io/tags/soldity/</link>
-        <pubDate>Fri, 19 Dec 2025 15:17:19 +0800</pubDate>
+        <lastBuildDate>Mon, 29 Dec 2025 12:11:01 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>POC</title>
+        <link>https://byebydoggy.github.io/tags/poc/</link>
+        <pubDate>Mon, 29 Dec 2025 12:11:01 +0800</pubDate>
         
-        <guid>https://byebydoggy.github.io/tags/soldity/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>区块链</title>
-        <link>https://byebydoggy.github.io/tags/%E5%8C%BA%E5%9D%97%E9%93%BE/</link>
-        <pubDate>Fri, 19 Dec 2025 15:17:19 +0800</pubDate>
-        
-        <guid>https://byebydoggy.github.io/tags/%E5%8C%BA%E5%9D%97%E9%93%BE/</guid>
+        <guid>https://byebydoggy.github.io/tags/poc/</guid>
         <description></description>
         </item>
         <item>
         <title>Solidity</title>
         <link>https://byebydoggy.github.io/tags/solidity/</link>
-        <pubDate>Thu, 18 Dec 2025 18:22:21 +0800</pubDate>
+        <pubDate>Sat, 20 Dec 2025 20:41:07 +0800</pubDate>
         
         <guid>https://byebydoggy.github.io/tags/solidity/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>区块链</title>
+        <link>https://byebydoggy.github.io/tags/%E5%8C%BA%E5%9D%97%E9%93%BE/</link>
+        <pubDate>Sat, 20 Dec 2025 20:41:07 +0800</pubDate>
+        
+        <guid>https://byebydoggy.github.io/tags/%E5%8C%BA%E5%9D%97%E9%93%BE/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Vyper</title>
+        <link>https://byebydoggy.github.io/tags/vyper/</link>
+        <pubDate>Sat, 20 Dec 2025 14:24:05 +0800</pubDate>
+        
+        <guid>https://byebydoggy.github.io/tags/vyper/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>FineReport</title>
+        <link>https://byebydoggy.github.io/tags/finereport/</link>
+        <pubDate>Fri, 19 Dec 2025 22:10:43 +0800</pubDate>
+        
+        <guid>https://byebydoggy.github.io/tags/finereport/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Web漏洞</title>
+        <link>https://byebydoggy.github.io/tags/web%E6%BC%8F%E6%B4%9E/</link>
+        <pubDate>Fri, 19 Dec 2025 22:10:43 +0800</pubDate>
+        
+        <guid>https://byebydoggy.github.io/tags/web%E6%BC%8F%E6%B4%9E/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Soldity</title>
+        <link>https://byebydoggy.github.io/tags/soldity/</link>
+        <pubDate>Fri, 19 Dec 2025 15:17:19 +0800</pubDate>
+        
+        <guid>https://byebydoggy.github.io/tags/soldity/</guid>
         <description></description>
         </item>
         <item>

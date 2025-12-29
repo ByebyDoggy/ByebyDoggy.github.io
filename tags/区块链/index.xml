@@ -6,7 +6,90 @@
         <description>Recent content in 区块链 on Byebyedoggy</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
-        <lastBuildDate>Fri, 19 Dec 2025 15:17:19 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/tags/%E5%8C%BA%E5%9D%97%E9%93%BE/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sat, 20 Dec 2025 20:41:07 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/tags/%E5%8C%BA%E5%9D%97%E9%93%BE/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>1220 DexodusFinance价格更新脆弱漏洞</title>
+        <link>https://byebydoggy.github.io/post/2025/1220-dexodusfinance%E4%BB%B7%E6%A0%BC%E6%9B%B4%E6%96%B0%E8%84%86%E5%BC%B1%E6%BC%8F%E6%B4%9E/</link>
+        <pubDate>Sat, 20 Dec 2025 20:41:07 +0800</pubDate>
+        
+        <guid>https://byebydoggy.github.io/post/2025/1220-dexodusfinance%E4%BB%B7%E6%A0%BC%E6%9B%B4%E6%96%B0%E8%84%86%E5%BC%B1%E6%BC%8F%E6%B4%9E/</guid>
+        <description>&lt;img src="https://byebydoggy.github.io/cover.png" alt="Featured image of post 1220 DexodusFinance价格更新脆弱漏洞" /&gt;&lt;h1 id=&#34;基本信息&#34;&gt;基本信息
+&lt;/h1&gt;&lt;p&gt;攻击日志:app.blocksec.com/explorer/tx/base/0x7501847c70d2cdcfbb8c6bd3585640f568cd287242b64027e5a829646e084257&lt;/p&gt;
+&lt;p&gt;攻击路径:闪电贷-&amp;gt;Dex开多头仓位-&amp;gt;随后立即平仓，期间收益达到百分之5，300万本金，收益15万u。  据BlockSec所说，并参考LP池合约开源的代码，推测应该是依靠单一预言机故障，属于价格更新脆弱漏洞。&lt;/p&gt;
+&lt;h1 id=&#34;漏洞合约&#34;&gt;漏洞合约
+&lt;/h1&gt;&lt;p&gt;开发者已经删库跑路，看不到合约内容了。。。&lt;/p&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;&#34; &gt;https://github.com/DexodusGenesis/dexodus&lt;/a&gt;&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>1220 YearnFinance稳定币池漏洞复现</title>
+        <link>https://byebydoggy.github.io/post/2025/1220-yearnfinance%E7%A8%B3%E5%AE%9A%E5%B8%81%E6%B1%A0%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/</link>
+        <pubDate>Sat, 20 Dec 2025 14:24:05 +0800</pubDate>
+        
+        <guid>https://byebydoggy.github.io/post/2025/1220-yearnfinance%E7%A8%B3%E5%AE%9A%E5%B8%81%E6%B1%A0%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/</guid>
+        <description>&lt;img src="https://byebydoggy.github.io/cover.png" alt="Featured image of post 1220 YearnFinance稳定币池漏洞复现" /&gt;&lt;h1 id=&#34;基本信息&#34;&gt;基本信息
+&lt;/h1&gt;&lt;p&gt;池合约:0xccd04073f4bdc4510927ea9ba350875c3c65bf81&lt;/p&gt;
+&lt;p&gt;yETH基本信息: 存储8种ETH的流动性质押代币（LST），如wstETH,rETH,cbETH&amp;hellip;., 凭证代币(LP)是yETH&lt;/p&gt;
+&lt;p&gt;Defi稳定池相关概念: 合约内置虚拟余额（virtual balance），若使用真实余额，每次需要调用balanceof，gas消耗高，且数值精度容易丢失。&lt;/p&gt;
+&lt;p&gt;LST之间兑换时依赖不变量公式: Π(vb_i^w_i)(1,n) = K ， 对每个LST的vb求其池权重的指数后累计相乘后的结果需要为一个固定常数K&lt;/p&gt;
+&lt;p&gt;虚拟余额把所有锚定代币换算成统一的余额，按照公式&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-plaintext&#34; data-lang=&#34;plaintext&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;虚拟余额（vb）= 某LST原始余额 × 该LST价格系数 × 该LST精度系数 × 该LST权重系数
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;原始余额：池子实际持有的 LST 数量（如 rETH22ETH、mETH33ETH、stETH55ETH）；
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;价格系数：将 LST 换算成 ETH 等值的系数（如 rETH 价格系数 = 1.01，22ETH rETH≈22.22ETH 等值），统一计价标准；
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;精度系数：将不同小数位数的 LST 换算成统一精度（如都换算成 18 位小数），避免计算误差；
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;权重系数：按池内约定权重（rETH20%、mETH30%、stETH50%）加权，确保虚拟余额与权重挂钩，方便后续均衡操作。 维持池内代币数量按照权重分布
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;核心漏洞函数&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;   &lt;span style=&#34;color:#a6e22e&#34;&gt;@external&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;@nonreentrant&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;lock&amp;#39;&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;remove_liquidity&lt;/span&gt;(
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    _lp_amount: uint256, 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    _min_amounts: DynArray[uint256, MAX_NUM_ASSETS], 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    _receiver: address &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; msg&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;sender
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&amp;#34;&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;    @notice Withdraw assets from the pool in a balanced manner
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;    @param _lp_amount Amount of LP tokens to burn
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;    @param _min_amounts Array of minimum amount of each asset to send
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;    @param _receiver Account to receive the assets
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;    &amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    num_assets: uint256 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;num_assets
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;assert&lt;/span&gt; len(_min_amounts) &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; num_assets
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;# update supply&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    prev_supply: uint256 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;supply
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    supply: uint256 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; prev_supply &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; _lp_amount
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;supply &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; supply
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    PoolToken(token)&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;burn(msg&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;sender, _lp_amount)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    log RemoveLiquidity(msg&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;sender, _receiver, _lp_amount)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;# update necessary variables and transfer assets&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    vb_prod: uint256 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; PRECISION
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    vb_sum: uint256 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    prev_vb: uint256 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    rate: uint256 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    packed_weight: uint256 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; asset &lt;span style=&#34;color:#f92672&#34;&gt;in&lt;/span&gt; range(MAX_NUM_ASSETS):
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; asset &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; num_assets:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            &lt;span style=&#34;color:#66d9ef&#34;&gt;break&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        prev_vb, rate, packed_weight &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;_unpack_vb(self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;packed_vbs[asset])
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        weight: uint256 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;_unpack_wn(packed_weight, &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        dvb: uint256 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; prev_vb &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt; _lp_amount &lt;span style=&#34;color:#f92672&#34;&gt;/&lt;/span&gt; prev_supply &lt;span style=&#34;color:#75715e&#34;&gt;# vyper除法向下取整，潜在漏洞&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        vb: uint256 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; prev_vb &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt; dvb  &lt;span style=&#34;color:#75715e&#34;&gt;# 可能导致残存vb&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;packed_vbs[asset] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;_pack_vb(vb, rate, packed_weight) &lt;span style=&#34;color:#75715e&#34;&gt;# 关键问题，仅更新vb，但未判断若该LST的supply完全归零时刻，导致即使supply为0，仍存在一个非零虚拟余额.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        vb_prod &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; unsafe_div(unsafe_mul(vb_prod, self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;_pow_down(unsafe_div(unsafe_mul(supply, weight), vb), unsafe_mul(weight, num_assets))), PRECISION)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        vb_sum &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; unsafe_add(vb_sum, vb)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        amount: uint256 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; dvb &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt; PRECISION &lt;span style=&#34;color:#f92672&#34;&gt;/&lt;/span&gt; rate
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;assert&lt;/span&gt; amount &lt;span style=&#34;color:#f92672&#34;&gt;&amp;gt;=&lt;/span&gt; _min_amounts[asset], &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;slippage&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;assert&lt;/span&gt; ERC20(self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;assets[asset])&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;transfer(_receiver, amount, default_return_value&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;True&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;packed_pool_vb &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; self&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;_pack_pool_vb(vb_prod, vb_sum)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;难度有点大，需要研究下CurveStableSwap的公式  总体思路是多次不平衡添加流动性导致了Π坍缩，恒等式发散，最终使用极少存款就可以增发大量LP代币。 具体计算过程和状态变化量等研究明白后粘过来。&lt;/p&gt;
+</description>
+        </item>
+        <item>
         <title>1219 GoldFinch旧版本Pool合约漏洞</title>
         <link>https://byebydoggy.github.io/post/2025/1219-goldfinch%E6%97%A7%E7%89%88%E6%9C%ACpool%E5%90%88%E7%BA%A6%E6%BC%8F%E6%B4%9E/</link>
         <pubDate>Fri, 19 Dec 2025 15:17:19 +0800</pubDate>

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Vulnerability Information\rItem Details Vulnerability Name PHPEMS Points Concurrent Usage Race Condition Vulnerability Affected Versions PHPEMS 11.0 and earlier Type Cross-Site Request Forgery (CSRF) Severity Medium Reproduction Environment\rTest Site: Local deployment Source Code Setup: Download any version from the official website: https://www.phpems.net/ Tool: Burp Suite Reproduction Steps\rPrepare the test account: Log in to the PHPEMS system with a valid ordinary user account, and confirm that the account has the permission to manage personal/file attachment settings (or system-level file type configuration permission that is not protected by CSRF). Capture the vulnerable request: Use Burp Suite to intercept the HTTP request when the user modifies the allowed file name extensions (e.g., adding/editing the list of uploadable file suffixes). The core request typically contains parameters such as allowed_extensions (or similar keys) for submitting the updated suffix list. Construct the CSRF payload: Create a malicious static HTML page that automatically sends the intercepted request (modified to add dangerous suffixes like phar). The payload will forge the request using the victim&rsquo;s valid session (without the victim&rsquo;s knowledge). Trigger the CSRF attack: Ask the logged-in ordinary user (victim) to access the malicious HTML page (e.g., via phishing link, embedded in a malicious website). The page will automatically submit the forged request in the background. Verification Result : A single coupon can be used to recharge all accounts.Only one coupon redemption record is logged in the backend system.\n">
+<title>1231 PHPEMS CSRF POC</title>
+
+<link rel='canonical' href='https://byebydoggy.github.io/post/2025/1231-phpems-csrf-poc/'>
+
+<link rel="stylesheet" href="/scss/style.min.4d36f8dc1fd48129e1635deb4b8eb2870fa09474f7280c4cb606d40b2526994b.css"><meta property='og:title' content="1231 PHPEMS CSRF POC">
+<meta property='og:description' content="Vulnerability Information\rItem Details Vulnerability Name PHPEMS Points Concurrent Usage Race Condition Vulnerability Affected Versions PHPEMS 11.0 and earlier Type Cross-Site Request Forgery (CSRF) Severity Medium Reproduction Environment\rTest Site: Local deployment Source Code Setup: Download any version from the official website: https://www.phpems.net/ Tool: Burp Suite Reproduction Steps\rPrepare the test account: Log in to the PHPEMS system with a valid ordinary user account, and confirm that the account has the permission to manage personal/file attachment settings (or system-level file type configuration permission that is not protected by CSRF). Capture the vulnerable request: Use Burp Suite to intercept the HTTP request when the user modifies the allowed file name extensions (e.g., adding/editing the list of uploadable file suffixes). The core request typically contains parameters such as allowed_extensions (or similar keys) for submitting the updated suffix list. Construct the CSRF payload: Create a malicious static HTML page that automatically sends the intercepted request (modified to add dangerous suffixes like phar). The payload will forge the request using the victim&rsquo;s valid session (without the victim&rsquo;s knowledge). Trigger the CSRF attack: Ask the logged-in ordinary user (victim) to access the malicious HTML page (e.g., via phishing link, embedded in a malicious website). The page will automatically submit the forged request in the background. Verification Result : A single coupon can be used to recharge all accounts.Only one coupon redemption record is logged in the backend system.\n">
+<meta property='og:url' content='https://byebydoggy.github.io/post/2025/1231-phpems-csrf-poc/'>
+<meta property='og:site_name' content='Byebyedoggy'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='POC' /><meta property='article:published_time' content='2025-12-31T22:15:52&#43;08:00'/><meta property='article:modified_time' content='2025-12-31T22:15:52&#43;08:00'/><meta property='og:image' content='https://byebydoggy.github.io/cover.png' />
+<meta name="twitter:title" content="1231 PHPEMS CSRF POC">
+<meta name="twitter:description" content="Vulnerability Information\rItem Details Vulnerability Name PHPEMS Points Concurrent Usage Race Condition Vulnerability Affected Versions PHPEMS 11.0 and earlier Type Cross-Site Request Forgery (CSRF) Severity Medium Reproduction Environment\rTest Site: Local deployment Source Code Setup: Download any version from the official website: https://www.phpems.net/ Tool: Burp Suite Reproduction Steps\rPrepare the test account: Log in to the PHPEMS system with a valid ordinary user account, and confirm that the account has the permission to manage personal/file attachment settings (or system-level file type configuration permission that is not protected by CSRF). Capture the vulnerable request: Use Burp Suite to intercept the HTTP request when the user modifies the allowed file name extensions (e.g., adding/editing the list of uploadable file suffixes). The core request typically contains parameters such as allowed_extensions (or similar keys) for submitting the updated suffix list. Construct the CSRF payload: Create a malicious static HTML page that automatically sends the intercepted request (modified to add dangerous suffixes like phar). The payload will forge the request using the victim&rsquo;s valid session (without the victim&rsquo;s knowledge). Trigger the CSRF attack: Ask the logged-in ordinary user (victim) to access the malicious HTML page (e.g., via phishing link, embedded in a malicious website). The page will automatically submit the forged request in the background. Verification Result : A single coupon can be used to recharge all accounts.Only one coupon redemption record is logged in the backend system.\n"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://byebydoggy.github.io/cover.png' />
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column compact"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hu_8ac7c2653184b428.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Byebyedoggy</a></h1>
+            <h2 class="site-description"></h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    
+
+            <main class="main full-width">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/post/2025/1231-phpems-csrf-poc/">
+                
+                    <img src="/cover.png" loading="lazy" alt="Featured image of post 1231 PHPEMS CSRF POC" />
+                
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/poc/" >
+                POC
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/post/2025/1231-phpems-csrf-poc/">1231 PHPEMS CSRF POC</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published" datetime='2025-12-31T22:15:52&#43;08:00'>Dec 31, 2025</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 3 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="vulnerability-information">Vulnerability Information
+</h1><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>Item</th>
+          <th>Details</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Vulnerability Name</td>
+          <td>PHPEMS Points Concurrent Usage Race Condition Vulnerability</td>
+      </tr>
+      <tr>
+          <td>Affected Versions</td>
+          <td>PHPEMS 11.0 and earlier</td>
+      </tr>
+      <tr>
+          <td>Type</td>
+          <td>Cross-Site Request Forgery (CSRF)</td>
+      </tr>
+      <tr>
+          <td>Severity</td>
+          <td>Medium</td>
+      </tr>
+  </tbody>
+</table></div>
+<h1 id="reproduction-environment">Reproduction Environment
+</h1><ol>
+<li>Test Site: Local deployment</li>
+<li>Source Code Setup: Download any version from the official website: <a class="link" href="https://www.phpems.net/"  target="_blank" rel="noopener"
+    >https://www.phpems.net/</a></li>
+<li>Tool: Burp Suite</li>
+</ol>
+<h1 id="reproduction-steps">Reproduction Steps
+</h1><ol>
+<li>Prepare the test account: Log in to the PHPEMS system with a valid ordinary user account, and confirm that the account has the permission to manage personal/file attachment settings (or system-level file type configuration permission that is not protected by CSRF).</li>
+<li>Capture the vulnerable request: Use Burp Suite to intercept the HTTP request when the user modifies the allowed file name extensions (e.g., adding/editing the list of uploadable file suffixes). The core request typically contains parameters such as allowed_extensions (or similar keys) for submitting the updated suffix list.
+<img src="/phpems/pic8.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></li>
+<li>Construct the CSRF payload: Create a malicious static HTML page that automatically sends the intercepted request (modified to add dangerous suffixes like phar). The payload will forge the request using the victim&rsquo;s valid session (without the victim&rsquo;s knowledge).
+<img src="/phpems/pic9.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="img"
+	
+	
+></li>
+<li>Trigger the CSRF attack: Ask the logged-in ordinary user (victim) to access the malicious HTML page (e.g., via phishing link, embedded in a malicious website). The page will automatically submit the forged request in the background.</li>
+</ol>
+<p><strong>Verification Result</strong> : A single coupon can be used to recharge all accounts.Only one coupon redemption record is logged in the backend system.</p>
+<h1 id="impact">Impact
+</h1><ul>
+<li>Ordinary users (without proper authorization awareness) can be tricked into modifying the system&rsquo;s allowed file name extensions, adding dangerous suffixes such as phar that can execute malicious code.</li>
+<li>Attackers can further upload malicious PHAR files (or PHP scripts) after the suffix restriction is lifted, leading to server-side code execution, data theft, or server takeover.</li>
+<li>Compromises the system&rsquo;s file upload security mechanism, which is a critical defense line against malicious file attacks.
+May cause the leakage of sensitive data (e.g., user information, exam data) in the PHPEMS system, or damage to the system&rsquo;s normal operation.</li>
+</ul>
+<h1 id="mitigation-recommendations">Mitigation Recommendations
+</h1><ol>
+<li>Implement CSRF token verification: Add a unique, random CSRF token to all sensitive operation requests (e.g., file extension modification, points operation). The token should be stored in the user&rsquo;s session and verified on the server side before processing the request.</li>
+<li>Example implementation: Generate a token in the page and carry it in the form, then validate it on the backend.
+Strengthen permission control: Restrict the permission to modify file name extensions to only high-privilege backend administrators (prohibit ordinary users from accessing this function), and add secondary authentication (e.g., password verification) for sensitive configuration modifications.</li>
+<li>Validate and whitelist file extensions: Even if the configuration is modified, implement a hard-coded whitelist of safe file extensions on the server side for file upload operations. Reject any file whose suffix is not in the whitelist (ignore the user-modifiable configuration for critical security checks).</li>
+<li>Check the Referer/Origin header: On the server side, verify that the Referer or Origin header of the request comes from the official domain of the PHPEMS system to block cross-domain forged requests (as an auxiliary defense measure).</li>
+<li>Disable the execution permission of uploaded files: Store uploaded files in a directory that is not parsed by the web server (e.g., disable PHP parsing for the upload directory), and prohibit the execution of PHAR/PHP files in the upload directory even if they are uploaded.</li>
+</ol>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/poc/">POC</a>
+        
+    </section>
+
+
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/post/2025/1229-phpems-coupon-recharge-race-condition-poc/">
+        
+        
+            <div class="article-image">
+                
+                    <img src="/cover.png" loading="lazy" data-key="1229 PHPEMS Coupon Recharge Race Condition Poc" data-hash="/cover.png"/>
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">1229 PHPEMS Coupon Recharge Race Condition Poc</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+        2025 Byebyedoggy
+    </section>
+    
+    <section class="powerby">
+        使用 <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> 构建 <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.32.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.c922af694cc257bf1ecc41c0dd7b0430f9114ec280ccf67cd2c6ad55f5316c4e.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

@@ -6,7 +6,93 @@
         <description>Recent content in POC on Byebyedoggy</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>en-us</language>
-        <lastBuildDate>Mon, 29 Dec 2025 12:11:01 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/tags/poc/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Wed, 31 Dec 2025 22:15:52 +0800</lastBuildDate><atom:link href="https://byebydoggy.github.io/tags/poc/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>1231 PHPEMS CSRF POC</title>
+        <link>https://byebydoggy.github.io/post/2025/1231-phpems-csrf-poc/</link>
+        <pubDate>Wed, 31 Dec 2025 22:15:52 +0800</pubDate>
+        
+        <guid>https://byebydoggy.github.io/post/2025/1231-phpems-csrf-poc/</guid>
+        <description>&lt;img src="https://byebydoggy.github.io/cover.png" alt="Featured image of post 1231 PHPEMS CSRF POC" /&gt;&lt;h1 id=&#34;vulnerability-information&#34;&gt;Vulnerability Information
+&lt;/h1&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Item&lt;/th&gt;
+          &lt;th&gt;Details&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Vulnerability Name&lt;/td&gt;
+          &lt;td&gt;PHPEMS Points Concurrent Usage Race Condition Vulnerability&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Affected Versions&lt;/td&gt;
+          &lt;td&gt;PHPEMS 11.0 and earlier&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Type&lt;/td&gt;
+          &lt;td&gt;Cross-Site Request Forgery (CSRF)&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Severity&lt;/td&gt;
+          &lt;td&gt;Medium&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h1 id=&#34;reproduction-environment&#34;&gt;Reproduction Environment
+&lt;/h1&gt;&lt;ol&gt;
+&lt;li&gt;Test Site: Local deployment&lt;/li&gt;
+&lt;li&gt;Source Code Setup: Download any version from the official website: &lt;a class=&#34;link&#34; href=&#34;https://www.phpems.net/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://www.phpems.net/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Tool: Burp Suite&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h1 id=&#34;reproduction-steps&#34;&gt;Reproduction Steps
+&lt;/h1&gt;&lt;ol&gt;
+&lt;li&gt;Prepare the test account: Log in to the PHPEMS system with a valid ordinary user account, and confirm that the account has the permission to manage personal/file attachment settings (or system-level file type configuration permission that is not protected by CSRF).&lt;/li&gt;
+&lt;li&gt;Capture the vulnerable request: Use Burp Suite to intercept the HTTP request when the user modifies the allowed file name extensions (e.g., adding/editing the list of uploadable file suffixes). The core request typically contains parameters such as allowed_extensions (or similar keys) for submitting the updated suffix list.
+&lt;img src=&#34;https://byebydoggy.github.io/phpems/pic8.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/li&gt;
+&lt;li&gt;Construct the CSRF payload: Create a malicious static HTML page that automatically sends the intercepted request (modified to add dangerous suffixes like phar). The payload will forge the request using the victim&amp;rsquo;s valid session (without the victim&amp;rsquo;s knowledge).
+&lt;img src=&#34;https://byebydoggy.github.io/phpems/pic9.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;img&#34;
+	
+	
+&gt;&lt;/li&gt;
+&lt;li&gt;Trigger the CSRF attack: Ask the logged-in ordinary user (victim) to access the malicious HTML page (e.g., via phishing link, embedded in a malicious website). The page will automatically submit the forged request in the background.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;Verification Result&lt;/strong&gt; : A single coupon can be used to recharge all accounts.Only one coupon redemption record is logged in the backend system.&lt;/p&gt;
+&lt;h1 id=&#34;impact&#34;&gt;Impact
+&lt;/h1&gt;&lt;ul&gt;
+&lt;li&gt;Ordinary users (without proper authorization awareness) can be tricked into modifying the system&amp;rsquo;s allowed file name extensions, adding dangerous suffixes such as phar that can execute malicious code.&lt;/li&gt;
+&lt;li&gt;Attackers can further upload malicious PHAR files (or PHP scripts) after the suffix restriction is lifted, leading to server-side code execution, data theft, or server takeover.&lt;/li&gt;
+&lt;li&gt;Compromises the system&amp;rsquo;s file upload security mechanism, which is a critical defense line against malicious file attacks.
+May cause the leakage of sensitive data (e.g., user information, exam data) in the PHPEMS system, or damage to the system&amp;rsquo;s normal operation.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h1 id=&#34;mitigation-recommendations&#34;&gt;Mitigation Recommendations
+&lt;/h1&gt;&lt;ol&gt;
+&lt;li&gt;Implement CSRF token verification: Add a unique, random CSRF token to all sensitive operation requests (e.g., file extension modification, points operation). The token should be stored in the user&amp;rsquo;s session and verified on the server side before processing the request.&lt;/li&gt;
+&lt;li&gt;Example implementation: Generate a token in the page and carry it in the form, then validate it on the backend.
+Strengthen permission control: Restrict the permission to modify file name extensions to only high-privilege backend administrators (prohibit ordinary users from accessing this function), and add secondary authentication (e.g., password verification) for sensitive configuration modifications.&lt;/li&gt;
+&lt;li&gt;Validate and whitelist file extensions: Even if the configuration is modified, implement a hard-coded whitelist of safe file extensions on the server side for file upload operations. Reject any file whose suffix is not in the whitelist (ignore the user-modifiable configuration for critical security checks).&lt;/li&gt;
+&lt;li&gt;Check the Referer/Origin header: On the server side, verify that the Referer or Origin header of the request comes from the official domain of the PHPEMS system to block cross-domain forged requests (as an auxiliary defense measure).&lt;/li&gt;
+&lt;li&gt;Disable the execution permission of uploaded files: Store uploaded files in a directory that is not parsed by the web server (e.g., disable PHP parsing for the upload directory), and prohibit the execution of PHAR/PHP files in the upload directory even if they are uploaded.&lt;/li&gt;
+&lt;/ol&gt;
+</description>
+        </item>
+        <item>
         <title>1229 PHPEMS Coupon Recharge Race Condition Poc</title>
         <link>https://byebydoggy.github.io/post/2025/1229-phpems-coupon-recharge-race-condition-poc/</link>
         <pubDate>Mon, 29 Dec 2025 12:11:01 +0800</pubDate>

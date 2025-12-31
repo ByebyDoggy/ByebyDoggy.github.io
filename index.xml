@@ -73,7 +73,6 @@
 &gt;&lt;/li&gt;
 &lt;li&gt;Trigger the CSRF attack: Ask the logged-in ordinary user (victim) to access the malicious HTML page (e.g., via phishing link, embedded in a malicious website). The page will automatically submit the forged request in the background.&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;&lt;strong&gt;Verification Result&lt;/strong&gt; : A single coupon can be used to recharge all accounts.Only one coupon redemption record is logged in the backend system.&lt;/p&gt;
 &lt;h1 id=&#34;impact&#34;&gt;Impact
 &lt;/h1&gt;&lt;ul&gt;
 &lt;li&gt;Ordinary users (without proper authorization awareness) can be tricked into modifying the system&amp;rsquo;s allowed file name extensions, adding dangerous suffixes such as phar that can execute malicious code.&lt;/li&gt;
